@@ -1,0 +1,24 @@
+org: saidulbadhon
+app: campus-japan-api
+service: campus-japan-api
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'staging'}
+  region: ap-northeast-1
+  timeout: 300
+  memorySize: 2048
+  environment:
+    NODE_ENV: staging
+    MONGODB_URL: mongodb+srv://campus-japan-user:epG0ZYlHnGxAaaoH@cluster0.8okjm08.mongodb.net/campus-japan-staging
+    JWT_SECRET: epG0ZYlHnGxAaaoH
+    APP_BASE_URL: https://campusjapan.com
+    SENDGRID_API_KEY: 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
+    FROM_EMAIL: "Team CampusJapan <no-reply@campusjapan.com>"
+functions:
+  app:
+    handler: server.handler
+    events:
+      - http: ANY /
+      - http: "ANY {proxy+}"
