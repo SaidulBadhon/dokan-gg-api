@@ -60,7 +60,6 @@ route
     }
   })
   .post("/", async (req, res) => {
-    console.log("req.body.ids : ", req.body.ids);
     try {
       const notification = await Notification.updateMany(
         {
@@ -68,13 +67,6 @@ route
         },
         { $set: { seen: true } },
         { multi: true }
-      );
-
-      console.log(
-        "req.body.ids : ",
-        req.body.ids,
-        " - Updated notifications : ",
-        JSON.stringify(notification, null, 2)
       );
 
       return res.status(200).json(notification);

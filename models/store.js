@@ -29,6 +29,12 @@ const StoreSchema = new mongoose.Schema(
     employees: [{ type: ObjectId, ref: "User", required: true }],
     // End of management
 
+    state: {
+      type: String,
+      enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
+      default: "pending",
+    },
+
     // rating: {
     //  count: 500,
     //  rate: 4.7

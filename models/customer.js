@@ -4,9 +4,22 @@ const { ObjectId } = Schema.Types;
 const CustomerSchema = new Schema(
   {
     user: { type: ObjectId, ref: "User", required: true },
-    avatar: { type: String, required: true },
-    slug: { type: String, required: true },
-    label: { type: String, required: true },
+
+    birthday: Date,
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      default: "male",
+    },
+
+    defaultPaymentMethod: {
+      type: String,
+      enum: ["bank", "bkash", "rocket", "nogod", "other"],
+      default: "other",
+    },
+    bkashNumber: String,
+    rocketNumber: String,
+    nogodNumber: String,
   },
   { timestamps: true }
 );

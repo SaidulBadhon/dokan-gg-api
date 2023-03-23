@@ -1,23 +1,57 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
-const OrderSchema = new mongoose.Schema(
+// Canceled – Grey
+// Completed – Blue
+// Failed – Red
+// On Hold – Orange
+// Pending Payment – Grey
+// Processing – Green
+// Refunded – Grey
+
+const productWithPriceSchema = new Schema({
+  product: { type: ObjectId, ref: "Product", required: true },
+  variant: { type: String, required: true },
+
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+});
+
+const OrderSchema = new Schema(
   {
-    name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    invoiceNumber: { type: String, required: true, unique: true },
+    customerId: { type: ObjectId, ref: "User", required: true },
 
-    state: String,
+    products: [productWithPriceSchema],
 
-    invoiceNumber: { type: Sequelize.INTEGER, required: false },
-    customerId: { type: Sequelize.INTEGER, required: true },
-    total: { type: Sequelize.INTEGER, required: false },
-    dueTotal: { type: Sequelize.INTEGER, required: false },
-    coupon: { type: Sequelize.STRING, required: false },
-    paymentMethod: { type: Sequelize.STRING, required: false },
-    trxId: { type: Sequelize.STRING, required: false },
-    status: { type: Sequelize.STRING, required: true },
+    total: { type: Number, required: true },
+
+    coupon: { type: ObjectId, ref: "Coupon", required: true },
+    paymentMethod: {
+      type: String,
+      enum: ["bank", "bkash", "rocket", "nogod", "other"],
+      default: "other",
+    },
+    trxId: String,
+
+    state: {
+      type: String,
+      enum: [
+        "pendingPayment",
+        "failed",
+
+        "processing",
+        "completed",
+
+        "onHold",
+        "canceled",
+
+        "refunded",
+      ],
+      default: "pendingPayment",
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = model("Order", OrderSchema);

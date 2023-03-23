@@ -7,10 +7,9 @@ const crypto = require("crypto");
 // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const slugify = require("../utils/slugify");
-const Applicant = require("../models/applicant");
-const Company = require("../models/company");
+// const Company = require("../models/company");
 const User = require("../models/user");
-const Token = require("../models/token");
+// const Token = require("../models/token");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../utils/sendEmail");
 
@@ -46,8 +45,8 @@ async function generateValidationToken(user) {
   console.log(user);
 
   // if (!user) throw new Error("User does not exist");
-  let token = await Token.findOne({ userId: user?.id });
-  if (token) await token.deleteOne();
+  // let token = await Token.findOne({ userId: user?.id });
+  // if (token) await token.deleteOne();
   let resetToken = crypto.randomBytes(32).toString("hex");
 
   const otp = generateOTP();
@@ -100,28 +99,28 @@ router
 
       const accessToken = getAccessToken(user._id);
 
-      if (user?.role === "applicant") {
-        let applicant = await Applicant.findOne({ user: user._id });
-        if (!applicant) applicant = await Applicant.create({ user: user._id });
+      // if (user?.role === "applicant") {
+      //   let applicant = await Applicant.findOne({ user: user._id });
+      //   if (!applicant) applicant = await Applicant.create({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          applicant,
-        });
-      } else if (user?.role === "company") {
-        let company = await Company.findOne({ user: user._id });
-        if (!company) company = await Company.create({ user: user._id });
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     applicant,
+      //   });
+      // } else if (user?.role === "company") {
+      //   let company = await Company.findOne({ user: user._id });
+      //   if (!company) company = await Company.create({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          company,
-        });
-      } else {
-        // if (user?.role === "admin") {
-        return res.status(200).json({ ...user.toObject(), accessToken });
-      }
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     company,
+      //   });
+      // } else {
+      // if (user?.role === "admin") {
+      return res.status(200).json({ ...user.toObject(), accessToken });
+      // }
     } catch (error) {
       next(error);
     }
@@ -159,23 +158,23 @@ router
       generateValidationToken(user);
       // const applicant = new Applicant({ user });
 
-      if (user?.role === "applicant") {
-        await Applicant.create({ user });
+      // if (user?.role === "applicant") {
+      //   await Applicant.create({ user });
 
-        // return res.status(200).json({
-        //   ...user.toObject(),
-        //   accessToken,
-        //   applicant,
-        // });
-      } else if (user?.role === "company") {
-        await Company.create({ user });
+      //   // return res.status(200).json({
+      //   //   ...user.toObject(),
+      //   //   accessToken,
+      //   //   applicant,
+      //   // });
+      // } else if (user?.role === "company") {
+      //   await Company.create({ user });
 
-        // return res.status(200).json({
-        //   ...user.toObject(),
-        //   accessToken,
-        //   company,
-        // });
-      }
+      //   // return res.status(200).json({
+      //   //   ...user.toObject(),
+      //   //   accessToken,
+      //   //   company,
+      //   // });
+      // }
 
       res.status(200).json({ status: "success" });
     } catch (err) {
@@ -230,11 +229,11 @@ router
 
       let token;
 
-      if (tokenString.length <= 6) {
-        token = await Token.findOne({ otp: tokenString });
-      } else {
-        token = await Token.findOne({ token: tokenString });
-      }
+      // if (tokenString.length <= 6) {
+      //   token = await Token.findOne({ otp: tokenString });
+      // } else {
+      //   token = await Token.findOne({ token: tokenString });
+      // }
       if (!token) return next(new Error("Token does not exist"));
 
       const user = await User.findByIdAndUpdate(token.userId, {
@@ -247,28 +246,28 @@ router
 
       const accessToken = getAccessToken(user._id);
 
-      if (user?.role === "applicant") {
-        let applicant = await Applicant.findOne({ user: user._id });
-        if (!applicant) applicant = await Applicant.create({ user: user._id });
+      // if (user?.role === "applicant") {
+      //   let applicant = await Applicant.findOne({ user: user._id });
+      //   if (!applicant) applicant = await Applicant.create({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          applicant,
-        });
-      } else if (user?.role === "company") {
-        let company = await Company.findOne({ user: user._id });
-        if (!company) company = await Company.create({ user: user._id });
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     applicant,
+      //   });
+      // } else if (user?.role === "company") {
+      //   let company = await Company.findOne({ user: user._id });
+      //   if (!company) company = await Company.create({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          company,
-        });
-      } else {
-        // if (user?.role === "admin") {
-        return res.status(200).json({ ...user.toObject(), accessToken });
-      }
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     company,
+      //   });
+      // } else {
+      // if (user?.role === "admin") {
+      return res.status(200).json({ ...user.toObject(), accessToken });
+      // }
     } catch (err) {
       console.log(err);
       next(err);

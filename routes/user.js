@@ -3,8 +3,6 @@ const route = express.Router();
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
-const Applicant = require("../models/applicant");
-const Company = require("../models/company");
 
 const getAccessToken = (userId) =>
   jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
@@ -46,25 +44,25 @@ route
 
       // const applicant = await Applicant.findOne({ user: user?._id });
 
-      if (user?.role === "applicant") {
-        let applicant = await Applicant.findOne({ user: user._id });
+      // if (user?.role === "applicant") {
+      //   let applicant = await Applicant.findOne({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          applicant,
-        });
-      } else if (user?.role === "company") {
-        let company = await Company.findOne({ user: user._id });
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     applicant,
+      //   });
+      // } else if (user?.role === "company") {
+      //   let company = await Company.findOne({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          company,
-        });
-      } else {
-        return res.status(200).json({ ...user.toObject(), accessToken });
-      }
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     company,
+      //   });
+      // } else {
+      return res.status(200).json({ ...user.toObject(), accessToken });
+      // }
 
       // console.log("=======================> ", applicant);
       // return res
