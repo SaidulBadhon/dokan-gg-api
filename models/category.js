@@ -2,14 +2,15 @@ const mongoose = require("mongoose");
 
 const CategorySchema = new mongoose.Schema(
   {
+    name: { type: String, required: true },
+    slug: { type: String, required: true },
+
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: false,
     },
-    avatar: { type: String, required: true },
-    slug: { type: String, required: true },
-    label: { type: String, required: true },
+    icon: { type: String, required: true },
   },
   { timestamps: true }
 );
