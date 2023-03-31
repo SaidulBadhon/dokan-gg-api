@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
-const StoreSchema = new mongoose.Schema(
+const StoreSchema = new Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
@@ -25,6 +25,7 @@ const StoreSchema = new mongoose.Schema(
     // End of address
 
     // Management
+    owner: { type: ObjectId, ref: "User", required: true },
     managers: [{ type: ObjectId, ref: "User", required: true }],
     employees: [{ type: ObjectId, ref: "User", required: true }],
     // End of management
@@ -43,4 +44,4 @@ const StoreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Store", StoreSchema);
+module.exports = model("Store", StoreSchema);

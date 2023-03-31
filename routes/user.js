@@ -1,6 +1,8 @@
 const express = require("express");
 const route = express.Router();
 const jwt = require("jsonwebtoken");
+const Customer = require("../models/customer");
+const Store = require("../models/store");
 
 const User = require("../models/user");
 
@@ -36,40 +38,31 @@ route
       return res.status(500).send(err);
     }
   })
-  .get("/:email", async (req, res) => {
+  .get("/:id", async (req, res) => {
     try {
-      const user = await User.findOne({ email: req.params.email });
-
+      const user = await User.findById(req.params.id);
       accessToken = getAccessToken(user._id);
 
-      // const applicant = await Applicant.findOne({ user: user?._id });
+      if (["seller", "manager", "moderator"].includes(user?.role)) {
+        let store = await Store.findOne({ owner: user._id });
 
-      // if (user?.role === "applicant") {
-      //   let applicant = await Applicant.findOne({ user: user._id });
+        return res.status(200).json({
+          ...user.toObject(),
+          accessToken,
+          store,
+        });
+      } else if (user?.role === "buyer") {
+        let customer = await Customer.findOne({ user: user._id });
 
-      //   return res.status(200).json({
-      //     ...user.toObject(),
-      //     accessToken,
-      //     applicant,
-      //   });
-      // } else if (user?.role === "company") {
-      //   let company = await Company.findOne({ user: user._id });
-
-      //   return res.status(200).json({
-      //     ...user.toObject(),
-      //     accessToken,
-      //     company,
-      //   });
-      // } else {
-      return res.status(200).json({ ...user.toObject(), accessToken });
-      // }
-
-      // console.log("=======================> ", applicant);
-      // return res
-      //   .status(200)
-      //   .json({ ...user.toObject(), accessToken, applicant });
+        return res.status(200).json({
+          ...user.toObject(),
+          accessToken,
+          customer,
+        });
+      } else {
+        return res.status(200).json({ ...user.toObject(), accessToken });
+      }
     } catch (err) {
-      console.log(err);
       res.status(500).send({ error: "User does not exist." });
     }
   })
