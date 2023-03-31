@@ -51,12 +51,12 @@ async function generateValidationToken(user) {
 
   const otp = generateOTP();
 
-  await new Token({
-    userId: user?.id,
-    token: resetToken,
-    otp,
-    createdAt: new Date(),
-  }).save();
+  // await new Token({
+  //   userId: user?.id,
+  //   token: resetToken,
+  //   otp,
+  //   createdAt: new Date(),
+  // }).save();
 
   // TODO: will add Email send feature here when we have email support api
   const responce = await sendEmail({
@@ -143,6 +143,7 @@ router
   })
   .post("/signup", async (req, res, next) => {
     try {
+      console.log(req.body);
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
       const newUser = new User({
