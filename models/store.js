@@ -12,8 +12,7 @@ const StoreSchema = new Schema(
     website: String,
     description: String,
 
-    phone: String,
-    mobile: String,
+    contactNumber: String,
     email: String,
 
     // Address fields
