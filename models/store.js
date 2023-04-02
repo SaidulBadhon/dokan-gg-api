@@ -3,8 +3,8 @@ const { ObjectId } = Schema.Types;
 
 const StoreSchema = new Schema(
   {
-    name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    name: { type: String },
+    slug: { type: String, unique: true },
 
     logo: String,
     coverArt: String,
@@ -26,8 +26,8 @@ const StoreSchema = new Schema(
 
     // Management
     owner: { type: ObjectId, ref: "User", required: true },
-    managers: [{ type: ObjectId, ref: "User", required: true }],
-    employees: [{ type: ObjectId, ref: "User", required: true }],
+    managers: [{ type: ObjectId, ref: "User" }],
+    employees: [{ type: ObjectId, ref: "User" }],
     // End of management
 
     state: {

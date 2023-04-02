@@ -101,7 +101,9 @@ router
 
       if (["seller", "manager", "moderator"].includes(user?.role)) {
         let store = await Store.findOne({ owner: user._id });
-        if (!store) store = await Store.create({ owner: user._id });
+        if (!store && user?.role === "seller") {
+          store = await Store.create({ owner: user._id });
+        }
 
         return res.status(200).json({
           ...user.toObject(),
@@ -152,10 +154,12 @@ router
         email,
         password: hashedPassword,
         role,
+
+        emailVerified: true,
       });
 
       const user = await saveAccessToken(newUser);
-      generateValidationToken(user);
+      // generateValidationToken(user);
 
       if (["seller", "manager", "moderator"].includes(user?.role)) {
         let store = await Store.create({ owner: user._id });
@@ -210,7 +214,7 @@ router
       const user = await User.findOne({ email: req.params.email });
       if (!user) throw new Error("User does not exist");
 
-      let returnStatus = generateValidationToken(user);
+      // let returnStatus = generateValidationToken(user);
 
       returnStatus?.then((state) => {
         if (!state) {
