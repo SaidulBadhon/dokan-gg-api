@@ -5,8 +5,6 @@ const Job = require("../models/job");
 
 route
   .get("/", async (req, res) => {
-    // let filterExp;
-
     const { sort = "", range = "", filter = "{}", companyId } = req.query;
     const rangeExp = range && JSON.parse(range);
 

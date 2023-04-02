@@ -4,7 +4,9 @@ const route = express.Router();
 const Store = require("../models/store");
 
 route
-  .get("/", async (req, res) => res.status(200), send("Store Page"))
+  .get("/", async (req, res) => {
+    res.status(200), send("Store Page");
+  })
   .get("/count", async (req, res) => {
     try {
       const count = await Job.countDocuments();
@@ -19,7 +21,7 @@ route
     try {
       const job = await Job.findByIdAndUpdate(req.params.id, {
         $inc: { view: 1 },
-      }).populate("company");
+      });
 
       return res.status(200).json(job);
     } catch (err) {
