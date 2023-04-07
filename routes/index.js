@@ -8,14 +8,15 @@ const store = require("./store");
 const publicStore = require("./public/store");
 
 const notification = require("./notification");
+const locationTree = require("./locationTree");
 
 // All Routes
 router.use("/auth", auth);
 router.use("/users", allowIfLogin, user);
 router.use("/stores", allowIfLogin, store);
+router.use("/locationTree", locationTree);
+router.use("/notification", allowIfLogin, notification);
 
 router.use("/public/stores", publicStore);
-
-router.use("/notification", allowIfLogin, notification);
 
 module.exports = router;

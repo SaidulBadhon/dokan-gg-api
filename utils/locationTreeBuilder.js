@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const data = {
   Barishal: {
     Barguna: [
@@ -4070,36 +4072,82 @@ const convertToSnakeCase = (str) => {
   return camelCaseStr;
 };
 
-const Main = () => {
+const dataSaver = async (domainName) => {
+  let file;
+
+  if (fs.existsSync(`./lavel-1.json`)) {
+    console.log("existsSync");
+    file = JSON.parse(fs.readFileSync(`./lavel-1.json`));
+  } else {
+    console.log("NO EXIST");
+    file = [];
+  }
+
+  console.log(file);
+
+  file.push(domainName);
+
+  fs.writeFile(`lavel-1.json`, JSON.stringify(file), (err) => {
+    if (err) {
+      console.log("ERROR: ", err);
+    }
+  });
+};
+
+const GetDataForProvince = () => {
+  let response = [];
+
+  Object.entries(data)?.map((item, index) => {
+    const dataToBuild = {
+      id: `${index}`,
+      name: item[0],
+      slug: convertToSnakeCase(item[0]),
+    };
+
+    response.push(dataToBuild);
+  });
+
+  dataSaver(response);
+};
+
+const GetDataForCities = () => {
+  let response = [];
+
+  Object.entries(data)?.map((item, index) => {
+    Object.entries(item[1])?.map((item2, index2) => {
+      //This is for Stage 2
+      const dataToBuild = {
+        id: `${index2}${index}`,
+        name: item2[0],
+        slug: convertToSnakeCase(item2[0]),
+        parentId: `${index}`,
+      };
+      response.push(dataToBuild);
+    });
+  });
+
+  dataSaver(response);
+};
+const GetDataForAreas = () => {
+  let response = [];
+
   Object.entries(data)?.map((item, index) => {
     Object.entries(item[1])?.map((item2, index2) => {
       Object.entries(item2[1])?.map((item3, index3) => {
         const dataToBuild = {
-          id: `${index2}${index3}`,
+          id: `${index3}${index2}${index}`,
           name: item3[1],
           slug: convertToSnakeCase(item3[1]),
-          parentId: index2,
+          parentId: `${index2}${index}`,
         };
-
-        console.log(dataToBuild);
-        // Object.entries(item3[1])?.map((item4, index4) => {
-        //   console.log(
-        //     item4[1],
-        //     "---",
-        //     item3[1],
-        //     "---",
-        //     item2[0],
-        //     "---",
-        //     item[0]
-        //   );
-        // });
+        response.push(dataToBuild);
       });
     });
-
-    // console.log(JSON.stringify(item[1], null, 2));
   });
 
-  //   console.log("data : ", data);
+  dataSaver(response);
 };
 
-Main();
+// GetDataForProvince();
+// GetDataForCities();
+// GetDataForAreas();
