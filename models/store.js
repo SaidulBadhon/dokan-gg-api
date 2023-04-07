@@ -1,6 +1,12 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
+const addressSchema = new Schema({
+  label: String,
+  isPrimary: Boolean,
+  addressBook: { type: ObjectId, ref: "AddressBook", required: true },
+});
+
 const StoreSchema = new Schema(
   {
     name: { type: String },
@@ -12,15 +18,11 @@ const StoreSchema = new Schema(
     website: String,
     description: String,
 
-    contactNumber: String,
+    number: String,
     email: String,
 
     // Address fields
-    address: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    country: String,
+    address: [addressSchema],
     // End of address
 
     // Management

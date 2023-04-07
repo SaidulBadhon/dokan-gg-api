@@ -1,6 +1,12 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
+const addressSchema = new Schema({
+  label: String,
+  isPrimary: Boolean,
+  addressBook: { type: ObjectId, ref: "AddressBook", required: true },
+});
+
 const CustomerSchema = new Schema(
   {
     user: { type: ObjectId, ref: "User", required: true },
@@ -20,6 +26,10 @@ const CustomerSchema = new Schema(
     bkashNumber: String,
     rocketNumber: String,
     nogodNumber: String,
+
+    // Address fields
+    address: [addressSchema],
+    // End of address
   },
   { timestamps: true }
 );
