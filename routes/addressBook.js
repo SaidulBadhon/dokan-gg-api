@@ -10,7 +10,6 @@ route
 
     try {
       const addressBooks = await AddressBook.find({ company: companyId })
-        .populate("company")
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
         .sort(sort);
@@ -36,7 +35,7 @@ route
     try {
       const addressBook = await AddressBook.findByIdAndUpdate(req.params.id, {
         $inc: { view: 1 },
-      }).populate("company");
+      });
 
       return res.status(200).json(addressBook);
     } catch (err) {

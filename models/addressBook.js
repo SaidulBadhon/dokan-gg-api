@@ -1,14 +1,15 @@
-const mongoose = require("mongoose");
+const { Schema, model } = require("mongoose");
+const { ObjectId } = Schema.Types;
 
-const AddressBookSchema = new mongoose.Schema(
+const AddressBookSchema = new Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: ObjectId,
       ref: "User",
       required: false,
     },
     store: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: ObjectId,
       ref: "Store",
       required: false,
     },
@@ -20,8 +21,10 @@ const AddressBookSchema = new mongoose.Schema(
     province: { type: String, required: true },
     city: { type: String, required: true },
     area: { type: String, required: true },
+
+    createdBy: { type: ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("AddressBook", AddressBookSchema);
+module.exports = model("AddressBook", AddressBookSchema);
