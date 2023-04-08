@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 
-const LocationTree = require("../models/useful/locationTree");
+const LocationTree = require("../../models/useful/locationTree");
 
 route
   .get("/province", async (req, res) => {
