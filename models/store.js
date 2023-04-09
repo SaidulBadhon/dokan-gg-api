@@ -7,6 +7,15 @@ const addressSchema = new Schema({
   addressBook: { type: ObjectId, ref: "AddressBook", required: true },
 });
 
+const socialLinkSchema = new Schema({
+  facebook: { type: String, required: false },
+  instagram: { type: String, required: false },
+  whatsApp: { type: String, required: false },
+  twitter: { type: String, required: false },
+  tiktok: { type: String, required: false },
+  linkedin: { type: String, required: false },
+});
+
 const StoreSchema = new Schema(
   {
     name: { type: String },
@@ -30,6 +39,13 @@ const StoreSchema = new Schema(
     managers: [{ type: ObjectId, ref: "User" }],
     employees: [{ type: ObjectId, ref: "User" }],
     // End of management
+
+    type: {
+      type: String,
+      enum: ["physical", "facebook", "website", "tiktok", "others"],
+      default: "facebook",
+    },
+    socialLinks: socialLinkSchema,
 
     state: {
       type: String,
