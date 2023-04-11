@@ -46,9 +46,8 @@ route
     try {
       const store = await Store.create({
         ...req.body,
+        owner: req?.user?._id,
       });
-
-      console.log(store);
 
       return res.status(200).json(store);
     } catch (err) {
