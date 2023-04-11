@@ -1,6 +1,6 @@
 org: saidulbadhon
-app: campus-japan-api
-service: campus-japan-api
+app: dokan-gg
+service: dokan-gg-api
 
 provider:
   name: aws
@@ -11,11 +11,11 @@ provider:
   memorySize: 2048
   environment:
     NODE_ENV: staging
-    MONGODB_URL: mongodb+srv://campus-japan-user:epG0ZYlHnGxAaaoH@cluster0.8okjm08.mongodb.net/campus-japan-staging
-    JWT_SECRET: epG0ZYlHnGxAaaoH
-    APP_BASE_URL: https://campusjapan.com
-    SENDGRID_API_KEY: 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
-    FROM_EMAIL: "Team CampusJapan <no-reply@campusjapan.com>"
+    MONGODB_URL: mongodb+srv://poket-dokan-user:6XGLsXHlT5ApKZhW@poket-dokan-cluster.g8aj6xc.mongodb.net/poket-dokan-dev?retryWrites=true&w=majority
+    JWT_SECRET: 6XGLsXHlT5ApKZhW
+    APP_BASE_URL: https://dokan.gg
+    SENDGRID_API_KEY:
+    FROM_EMAIL:
 functions:
   app:
     handler: server.handler
