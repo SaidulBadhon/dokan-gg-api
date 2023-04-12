@@ -12,6 +12,7 @@ const addressBook = require("./addressBook");
 
 // sellers routes
 const sellerStore = require("./sellers/store");
+const sellerProduct = require("./sellers/product");
 
 // public routes
 const publicStore = require("./public/store");
@@ -29,6 +30,7 @@ router.use("/addressBook", allowIfLogin, addressBook);
 
 // sellers routes
 router.use("/sellers/stores", allowIfLogin, sellerStore);
+router.use("/sellers/products", allowIfLogin, sellerProduct);
 
 // public routes
 router.use("/public/stores", publicStore);
