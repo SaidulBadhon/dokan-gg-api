@@ -12,7 +12,19 @@ route
           { managers: req?.user?._id },
           { employees: req?.user?._id },
         ],
-      });
+      })
+        .populate({
+          path: "owner",
+          select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
+        })
+        .populate({
+          path: "managers",
+          select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
+        })
+        .populate({
+          path: "employees",
+          select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
+        });
 
       return res.status(200).json(stores);
     } catch (err) {
