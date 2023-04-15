@@ -1,17 +1,24 @@
 const express = require("express");
 const route = express.Router();
 
+const Store = require("../../models/store");
 const Product = require("../../models/product");
+const slugify = require("../../utils/slugify");
 
 route
   .get("/", async (req, res) => {
     try {
-      const products = await Product.find({
+      const stores = await Store.find({
         $or: [
           { owner: req?.user?._id },
           { managers: req?.user?._id },
           { employees: req?.user?._id },
         ],
+      });
+
+      const products = await Product.find({ store: { $in: stores } }).populate({
+        path: "store",
+        select: { logo: 1, name: 1, slug: 1 },
       });
 
       return res.status(200).json(products);
@@ -46,6 +53,7 @@ route
     try {
       const product = await Product.create({
         ...req.body,
+        slug: slugify(req.body.name),
         owner: req?.user?._id,
       });
 

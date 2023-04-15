@@ -3,8 +3,8 @@ const { ObjectId } = Schema.Types;
 
 const imageSchema = new Schema({
   src: { type: String, required: true },
-  width: { type: String, required: true },
-  height: { type: String, required: true },
+  width: { type: String, required: false },
+  height: { type: String, required: false },
 });
 
 const colorSchema = new Schema({
@@ -40,7 +40,7 @@ const ProductSchema = new Schema(
     price: { type: Number, required: true },
     previousPrices: [previousPricesSchema],
 
-    shortDescription: { type: String, required: true },
+    shortDescription: { type: String, required: false },
     description: { type: String, required: true },
 
     shippingTime: Number,
@@ -51,7 +51,8 @@ const ProductSchema = new Schema(
     warranty: Number,
     maxReturnTime: Number,
 
-    images: [imageSchema],
+    // images: [imageSchema],
+    images: [String],
     colors: [colorSchema],
 
     inventory: { type: Number, required: true },
@@ -59,6 +60,12 @@ const ProductSchema = new Schema(
       type: String,
       enum: ["new", "likeNew", "used", "refurbished"],
       default: "new",
+    },
+
+    state: {
+      type: String,
+      enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
+      default: "pending",
     },
 
     views: [viewCountSchema],
