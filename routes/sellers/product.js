@@ -8,6 +8,9 @@ const slugify = require("../../utils/slugify");
 route
   .get("/", async (req, res) => {
     try {
+      const { range = "", filter = "{}" } = req.query;
+      const rangeExp = range && JSON.parse(range);
+
       const stores = await Store.find({
         $or: [
           { owner: req?.user?._id },
@@ -16,12 +19,23 @@ route
         ],
       });
 
-      const products = await Product.find({ store: { $in: stores } }).populate({
-        path: "store",
-        select: { logo: 1, name: 1, slug: 1 },
+      const products = await Product.find({ store: { $in: stores } })
+        .populate({
+          path: "store",
+          select: { logo: 1, name: 1, slug: 1 },
+        })
+        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
+        .skip(rangeExp.length && rangeExp[0])
+        .sort({ createdAt: -1 });
+
+      const countDocuments = await Product.countDocuments({
+        store: { $in: stores },
       });
 
-      return res.status(200).json(products);
+      return res.status(200).json({
+        result: products,
+        count: countDocuments,
+      });
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Product profile does not exist." });
