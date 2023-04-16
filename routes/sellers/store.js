@@ -6,6 +6,9 @@ const Store = require("../../models/store");
 route
   .get("/", async (req, res) => {
     try {
+      const { range = "", filter = "{}" } = req.query;
+      const rangeExp = range && JSON.parse(range);
+
       const stores = await Store.find({
         $or: [
           { owner: req?.user?._id },
@@ -24,9 +27,23 @@ route
         .populate({
           path: "employees",
           select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
-        });
+        })
+        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
+        .skip(rangeExp.length && rangeExp[0])
+        .sort({ createdAt: -1 });
 
-      return res.status(200).json(stores);
+      const countDocuments = await Store.countDocuments({
+        $or: [
+          { owner: req?.user?._id },
+          { managers: req?.user?._id },
+          { employees: req?.user?._id },
+        ],
+      });
+
+      return res.status(200).json({
+        result: stores,
+        count: countDocuments,
+      });
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Store profile does not exist." });
