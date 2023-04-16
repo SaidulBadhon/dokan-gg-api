@@ -216,8 +216,8 @@ router
 
       // let returnStatus = generateValidationToken(user);
 
-      returnStatus?.then((state) => {
-        if (!state) {
+      returnStatus?.then((status) => {
+        if (!status) {
           res.status(404).send("Failed to send email");
         } else {
           res.status(200).send({ status: "success" });

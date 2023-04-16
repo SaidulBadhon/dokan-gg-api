@@ -62,7 +62,7 @@ const ProductSchema = new Schema(
       default: "new",
     },
 
-    state: {
+    status: {
       type: String,
       enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
       default: "pending",

@@ -47,7 +47,7 @@ const StoreSchema = new Schema(
     },
     socialLinks: socialLinkSchema,
 
-    state: {
+    status: {
       type: String,
       enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
       default: "pending",

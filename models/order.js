@@ -34,7 +34,7 @@ const OrderSchema = new Schema(
     },
     trxId: String,
 
-    state: {
+    status: {
       type: String,
       enum: [
         "pendingPayment",

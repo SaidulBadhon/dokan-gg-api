@@ -40,8 +40,10 @@ route
       if (objectIdRegex.test(req.params.id)) {
         store = await Store.findById(req.params.id);
       } else {
-        store = await Store.findOne(req.params.id);
+        store = await Store.findOne({ slug: req.params.id });
       }
+
+      console.log(store);
 
       return res.status(200).json(store);
     } catch (err) {
