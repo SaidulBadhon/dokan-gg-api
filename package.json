@@ -2,7 +2,7 @@
   "name": "poket-dokan-api",
   "version": "1.0.0",
   "description": "poket-dokan Platform Backend API",
-  "main": "handler.js",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"

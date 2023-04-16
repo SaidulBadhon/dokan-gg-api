@@ -6,7 +6,7 @@ provider:
   name: aws
   runtime: nodejs14.x
   stage: ${opt:stage, 'staging'}
-  region: ap-northeast-1
+  region: ap-south-1
   timeout: 300
   memorySize: 2048
   environment:
@@ -14,8 +14,6 @@ provider:
     MONGODB_URL: mongodb+srv://poket-dokan-user:6XGLsXHlT5ApKZhW@poket-dokan-cluster.g8aj6xc.mongodb.net/poket-dokan-dev?retryWrites=true&w=majority
     JWT_SECRET: 6XGLsXHlT5ApKZhW
     APP_BASE_URL: https://dokan.gg
-    SENDGRID_API_KEY:
-    FROM_EMAIL:
 functions:
   app:
     handler: server.handler
