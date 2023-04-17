@@ -78,8 +78,6 @@ route
         store = await Store.findOne({ slug: req.params.id });
       }
 
-      console.log(store);
-
       return res.status(200).json(store);
     } catch (err) {
       console.log(err);

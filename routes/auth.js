@@ -100,15 +100,15 @@ router
       const accessToken = getAccessToken(user._id);
 
       if (["seller", "manager", "moderator"].includes(user?.role)) {
-        let store = await Store.findOne({ owner: user._id });
-        if (!store && user?.role === "seller") {
-          store = await Store.create({ owner: user._id });
+        let stores = await Store.find({ owner: user._id });
+        if (!stores && user?.role === "seller") {
+          stores = await Store.create({ owner: user._id });
         }
 
         return res.status(200).json({
           ...user.toObject(),
           accessToken,
-          store,
+          stores,
         });
       } else if (user?.role === "buyer") {
         let customer = await Customer.findOne({ user: user._id });

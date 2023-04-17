@@ -44,12 +44,16 @@ route
       accessToken = getAccessToken(user._id);
 
       if (["seller", "manager", "moderator"].includes(user?.role)) {
-        let store = await Store.findOne({ owner: user._id });
+        let stores = await Store.find({ owner: user._id }).select({
+          owner: 0,
+          managers: 0,
+          employees: 0,
+        });
 
         return res.status(200).json({
           ...user.toObject(),
           accessToken,
-          store,
+          stores,
         });
       } else if (user?.role === "buyer") {
         let customer = await Customer.findOne({ user: user._id });
