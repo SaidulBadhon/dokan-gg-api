@@ -20,7 +20,7 @@ route
           {
             $or: [
               {
-                title: {
+                name: {
                   $regex: search,
                   $options: "i",
                 },

@@ -6,19 +6,54 @@ const AddressBook = require("../../models/addressBook");
 
 route
   .get("/", async (req, res) => {
-    const { sort = "", range = "", filter = "{}" } = req.query;
+    const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
+    const { assignedTo = "", search, status, sort = "" } = JSON.parse(filter);
+
+    // let statusFilterQuery = status ? { status } : {};
+    let statusFilterQuery = { status: "active" };
+
+    const filterExp =
+      {
+        $and: [
+          { ...(assignedTo && { assignedTo }) },
+          statusFilterQuery,
+          {
+            $or: [
+              {
+                name: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                slug: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+            ],
+          },
+        ],
+      } || {};
+
     try {
-      const stores = await Store.find()
+      const stores = await Store.find(filterExp)
+        .select({ owner: 0, managers: 0, employees: 0 })
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
-        .sort(sort);
+        .sort({ createdAt: -1 });
 
-      return res.status(200).json(stores);
+      const countDocuments = await Store.countDocuments(filterExp);
+
+      return res.status(200).json({
+        result: stores,
+        count: countDocuments,
+      });
     } catch (err) {
       console.log(err);
-      return res.status(500).send(err);
+      res.status(500).send({ error: "Store profile does not exist." });
     }
   })
   .get("/count", async (req, res) => {
