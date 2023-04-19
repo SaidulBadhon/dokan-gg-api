@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 
-const AddressBook = require("../models/addressBook");
+const { AddressBook } = require("../../models/addressBook");
 
 route
   .get("/", async (req, res) => {

@@ -1,4 +1,6 @@
 const { Schema, model } = require("mongoose");
+const ratingSchema = require("./useful/rating");
+const viewSchema = require("./useful/view");
 const { ObjectId } = Schema.Types;
 
 const imageSchema = new Schema({
@@ -15,14 +17,6 @@ const colorSchema = new Schema({
 const previousPricesSchema = new Schema({
   price: { type: Number, required: true },
   expiryDate: { type: Date, required: true },
-});
-
-const viewCountSchema = new Schema({
-  count: { Number },
-  user: { type: ObjectId, ref: "Category" },
-  date: { type: Date, required: true },
-  ip: String,
-  source: String,
 });
 
 const ProductSchema = new Schema(
@@ -68,12 +62,10 @@ const ProductSchema = new Schema(
       default: "pending",
     },
 
-    views: [viewCountSchema],
+    views: viewSchema,
+    rating: ratingSchema,
 
-    // rating: {
-    //  count: 500,
-    //  rate: 4.7
-    // }
+    createdBy: { type: ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );

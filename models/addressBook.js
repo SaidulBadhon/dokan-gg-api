@@ -27,4 +27,7 @@ const AddressBookSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("AddressBook", AddressBookSchema);
+module.exports = {
+  AddressBook: model("AddressBook", AddressBookSchema),
+  AddressBookSchema,
+};

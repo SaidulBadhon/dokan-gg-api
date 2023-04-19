@@ -1,6 +1,8 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
+const { AddressBookSchema } = require("./addressBook");
+
 // Canceled – Grey
 // Completed – Blue
 // Failed – Red
@@ -10,17 +12,19 @@ const { ObjectId } = Schema.Types;
 // Refunded – Grey
 
 const productWithPriceSchema = new Schema({
-  product: { type: ObjectId, ref: "Product", required: true },
-  variant: { type: String, required: true },
+  // product: { type: ObjectId, ref: "Product", required: true },
+  product: { type: String, required: true },
+  variant: { type: String, default: "default" },
 
-  price: { type: Number, required: true },
   quantity: { type: Number, required: true },
+  price: { type: Number, required: true },
 });
 
 const OrderSchema = new Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true },
-    customerId: { type: ObjectId, ref: "User", required: true },
+    customer: { type: ObjectId, ref: "User", required: true },
+    deliveryAddress: { AddressBookSchema },
 
     products: [productWithPriceSchema],
 
@@ -29,8 +33,8 @@ const OrderSchema = new Schema(
     coupon: { type: ObjectId, ref: "Coupon", required: true },
     paymentMethod: {
       type: String,
-      enum: ["bank", "bkash", "rocket", "nogod", "other"],
-      default: "other",
+      enum: ["bank", "bkash", "rocket", "nogod", "cashOnDelivery", "other"],
+      default: "cashOnDelivery",
     },
     trxId: String,
 
