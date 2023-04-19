@@ -3,14 +3,14 @@ const ratingSchema = require("./useful/rating");
 const viewSchema = require("./useful/view");
 const { ObjectId } = Schema.Types;
 
-const imageSchema = new Schema({
-  src: { type: String, required: true },
-  width: { type: String, required: false },
-  height: { type: String, required: false },
-});
+// const imageSchema = new Schema({
+//   src: { type: String, required: true },
+//   width: { type: String, required: false },
+//   height: { type: String, required: false },
+// });
 
 const colorSchema = new Schema({
-  imageId: { type: imageSchema, required: true },
+  imageIndex: { type: Number, required: true },
   colors: [String],
 });
 
