@@ -39,13 +39,13 @@ route
 
     try {
       const products = await Product.find(filterExp)
-        .populate({
-          path: "store",
-          select: { logo: 1, name: 1, slug: 1 },
-        })
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
         .sort({ createdAt: -1 });
+      // .populate({
+      //   path: "store",
+      //   select: { logo: 1, name: 1, slug: 1 },
+      // })
 
       const countDocuments = await Product.countDocuments(filterExp);
 
@@ -53,6 +53,18 @@ route
         result: products,
         count: countDocuments,
       });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Product profile does not exist." });
+    }
+  })
+  .get("/:id/similar", async (req, res) => {
+    try {
+      const products = await Product.aggregate([
+        { $sample: { size: parseInt(req.query.limit || 5) } },
+      ]);
+
+      return res.status(200).json(products);
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Product profile does not exist." });
@@ -77,7 +89,13 @@ route
           },
         },
         { new: true, upsert: true }
-      );
+      ).populate({
+        path: "store",
+        select: {
+          name: 1,
+          slug: 1,
+        },
+      });
       // // Update the rating of a product
       // const product = await Product.findOneAndUpdate(
       //   { _id: req.params.id }, // Replace 'product_id' with the actual ID of the product you want to update
