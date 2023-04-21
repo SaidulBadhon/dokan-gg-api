@@ -3,6 +3,7 @@ const route = express.Router();
 
 const Store = require("../../models/store");
 const { AddressBook } = require("../../models/addressBook");
+const Product = require("../../models/product");
 
 route
   .get("/", async (req, res) => {
@@ -79,6 +80,32 @@ route
       }
 
       return res.status(200).json(store);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Store profile does not exist." });
+    }
+  })
+  .get("/:id/feature", async (req, res) => {
+    try {
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+
+      let products;
+
+      if (objectIdRegex.test(req.params.id)) {
+        // store = await Store.findById(req.params.id);
+
+        products = await Product.find({ store: req.params.id }).limit(
+          req.query.limit || 5
+        );
+      } else {
+        let store = await Store.findOne({ slug: req.params.id });
+
+        products = await Product.find({ store: store?._id }).limit(
+          req.query.limit || 5
+        );
+      }
+
+      return res.status(200).json(products);
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Store profile does not exist." });

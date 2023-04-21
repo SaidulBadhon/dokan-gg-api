@@ -8,14 +8,15 @@ route
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const { assignedTo = "", search, status, sort = "" } = JSON.parse(filter);
+    const { store, search, status, sortBy } = JSON.parse(filter);
 
+    let storeFilterQuery = store ? { store } : {};
     let statusFilterQuery = status ? { status } : {};
 
     const filterExp =
       {
         $and: [
-          { ...(assignedTo && { assignedTo }) },
+          storeFilterQuery,
           statusFilterQuery,
           {
             $or: [
@@ -40,7 +41,8 @@ route
       const products = await Product.find(filterExp)
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
-        .sort({ createdAt: -1 });
+        .sort(sortBy || { "views.count": -1 });
+      // .sort({ createdAt: -1 });
       // .populate({
       //   path: "store",
       //   select: { logo: 1, name: 1, slug: 1 },

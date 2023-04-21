@@ -12,8 +12,8 @@ const addressBook = require("./useful/addressBook");
 const order = require("./order");
 
 // sellers routes
-const sellerStore = require("./sellers/store");
-const sellerProduct = require("./sellers/product");
+const sellerStore = require("./sellers/sellerStore");
+const sellerProduct = require("./sellers/sellerProduct");
 
 // admin routes
 const adminCategory = require("./admin/adminCategory");
@@ -21,15 +21,14 @@ const adminStore = require("./admin/adminStore");
 const adminProduct = require("./admin/adminProduct");
 
 // public routes
-const publicStore = require("./public/store");
-const publicProduct = require("./public/product");
+const publicStore = require("./public/publicStore");
+const publicProduct = require("./public/publicProduct");
 
 // --------------------------------------- \\
 
 // All Routes
 router.use("/auth", auth);
 router.use("/users", allowIfLogin, user);
-// router.use("/stores", allowIfLogin, store);
 router.use("/notification", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
