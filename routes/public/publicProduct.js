@@ -73,13 +73,15 @@ route
   })
   .get("/:id", async (req, res) => {
     try {
-      // const product = await Product.findByIdAndUpdate(req.params.id, {
-      //   $inc: { view: 1 },
-      // });
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+
+      let productQuery = objectIdRegex.test(req.params.id)
+        ? { _id: req.params.id }
+        : { slug: req.params.id };
 
       // Update the view count of a product
       const product = await Product.findOneAndUpdate(
-        { _id: req.params.id }, // Replace 'product_id' with the actual ID of the product you want to update
+        productQuery, // Replace 'product_id' with the actual ID of the product you want to update
         {
           $inc: { "views.count": 1 },
           $push: {
@@ -116,7 +118,7 @@ route
       return res.status(200).json(product);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Product profile does not exist." });
+      res.status(500).send({ error: "Product does not exist." });
     }
   });
 
