@@ -57,16 +57,6 @@ route
       res.status(500).send({ error: "Store profile does not exist." });
     }
   })
-  .get("/count", async (req, res) => {
-    try {
-      const count = await Store.countDocuments();
-
-      return res.status(200).json(count);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-  })
   .get("/:id", async (req, res) => {
     try {
       const objectIdRegex = /^[0-9a-fA-F]{24}$/;
@@ -74,12 +64,16 @@ route
       let store;
 
       if (objectIdRegex.test(req.params.id)) {
-        store = await Store.findById(req.params.id);
+        store = await Store.findOne({ _id: req.params.id, status: "active" });
       } else {
-        store = await Store.findOne({ slug: req.params.id });
+        store = await Store.findOne({ slug: req.params.id, status: "active" });
       }
 
-      return res.status(200).json(store);
+      if (store) {
+        return res.status(200).json(store);
+      } else {
+        res.status(500).send({ error: "Store profile does not exist." });
+      }
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Store profile does not exist." });
@@ -94,15 +88,17 @@ route
       if (objectIdRegex.test(req.params.id)) {
         // store = await Store.findById(req.params.id);
 
-        products = await Product.find({ store: req.params.id }).limit(
-          req.query.limit || 5
-        );
+        products = await Product.find({
+          store: req.params.id,
+          status: "active",
+        }).limit(req.query.limit || 5);
       } else {
         let store = await Store.findOne({ slug: req.params.id });
 
-        products = await Product.find({ store: store?._id }).limit(
-          req.query.limit || 5
-        );
+        products = await Product.find({
+          store: store?._id,
+          status: "active",
+        }).limit(req.query.limit || 5);
       }
 
       return res.status(200).json(products);

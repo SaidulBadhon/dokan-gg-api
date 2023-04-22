@@ -8,10 +8,15 @@ route
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const { store, search, status, sortBy } = JSON.parse(filter);
+    const {
+      store,
+      search,
+      // status,
+      sortBy,
+    } = JSON.parse(filter);
 
     let storeFilterQuery = store ? { store } : {};
-    let statusFilterQuery = status ? { status } : {};
+    let statusFilterQuery = { status: "active" };
 
     const filterExp =
       {
@@ -59,9 +64,23 @@ route
       res.status(500).send({ error: "Product profile does not exist." });
     }
   })
+  .get("/feature", async (req, res) => {
+    try {
+      let products = await Product.aggregate([
+        { $match: { status: "active" } },
+        { $sample: { size: req.query?.limit || 10 } },
+      ]);
+
+      return res.status(200).json(products);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Store profile does not exist." });
+    }
+  })
   .get("/:id/similar", async (req, res) => {
     try {
       const products = await Product.aggregate([
+        { $match: { status: "active" } },
         { $sample: { size: parseInt(req.query.limit || 5) } },
       ]);
 
@@ -76,8 +95,8 @@ route
       const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 
       let productQuery = objectIdRegex.test(req.params.id)
-        ? { _id: req.params.id }
-        : { slug: req.params.id };
+        ? { _id: req.params.id, status: "active" }
+        : { slug: req.params.id, status: "active" };
 
       // Update the view count of a product
       const product = await Product.findOneAndUpdate(
