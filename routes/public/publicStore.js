@@ -91,20 +91,30 @@ route
         products = await Product.find({
           store: req.params.id,
           status: "active",
-        }).limit(req.query.limit || 5);
+        })
+          .limit(req.query.limit || 5)
+          .populate({
+            path: "store",
+            select: { logo: 1, name: 1, slug: 1 },
+          });
       } else {
         let store = await Store.findOne({ slug: req.params.id });
 
         products = await Product.find({
           store: store?._id,
           status: "active",
-        }).limit(req.query.limit || 5);
+        })
+          .limit(req.query.limit || 5)
+          .populate({
+            path: "store",
+            select: { logo: 1, name: 1, slug: 1 },
+          });
       }
 
       return res.status(200).json(products);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
+      res.status(500).send({ error: "Faild to get featured products." });
     }
   })
   .get("/:id/addressBook", async (req, res) => {

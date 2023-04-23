@@ -46,12 +46,12 @@ route
       const products = await Product.find(filterExp)
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
-        .sort(sortBy || { "views.count": -1 });
+        .sort(sortBy || { "views.count": -1 })
+        .populate({
+          path: "store",
+          select: { logo: 1, name: 1, slug: 1 },
+        });
       // .sort({ createdAt: -1 });
-      // .populate({
-      //   path: "store",
-      //   select: { logo: 1, name: 1, slug: 1 },
-      // })
 
       const countDocuments = await Product.countDocuments(filterExp);
 
@@ -61,7 +61,7 @@ route
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Product profile does not exist." });
+      res.status(500).send({ error: "Products does not exist." });
     }
   })
   .get("/feature", async (req, res) => {
@@ -70,11 +70,10 @@ route
         { $match: { status: "active" } },
         { $sample: { size: req.query?.limit || 10 } },
       ]);
-
       return res.status(200).json(products);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
+      res.status(500).send({ error: "Faild to get featured products." });
     }
   })
   .get("/:id/similar", async (req, res) => {
@@ -87,7 +86,7 @@ route
       return res.status(200).json(products);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Product profile does not exist." });
+      res.status(500).send({ error: "Faild to get similar products." });
     }
   })
   .get("/:id", async (req, res) => {

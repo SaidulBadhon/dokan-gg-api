@@ -5,6 +5,7 @@ const Customer = require("../models/customer");
 const Store = require("../models/store");
 
 const User = require("../models/user");
+const { AddressBook } = require("../models/addressBook");
 
 const getAccessToken = (userId) =>
   jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
@@ -23,16 +24,6 @@ route
         .sort(sort);
 
       return res.status(200).json(users);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-  })
-  .get("/count", async (req, res) => {
-    try {
-      const count = await User.estimatedDocumentCount();
-
-      return res.status(200).json(count);
     } catch (err) {
       console.log(err);
       return res.status(500).send(err);
@@ -68,6 +59,26 @@ route
       }
     } catch (err) {
       res.status(500).send({ error: "User does not exist." });
+    }
+  })
+  .get("/:id/addressBook", async (req, res) => {
+    try {
+      const addressBook = await AddressBook.find({ user: req.params.id });
+
+      return res.status(200).json(addressBook);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Store profile does not exist." });
+    }
+  })
+  .delete("/:id/addressBook/:addressBookId", async (req, res) => {
+    try {
+      const addressBook = await AddressBook.findById(addressBook);
+
+      return res.status(200).json(addressBook);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Store profile does not exist." });
     }
   })
   .post("/acceptEULA", async (req, res, next) => {
