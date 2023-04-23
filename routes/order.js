@@ -1,32 +1,20 @@
 const express = require("express");
 const route = express.Router();
 
+const Product = require("../models/product");
 const Order = require("../models/order");
 const randomNumber = require("../utils/randomNumber");
 
 route
   .get("/", async (req, res) => {
-    const { sort = "", range = "", filter = "{}" } = req.query;
-    const rangeExp = range && JSON.parse(range);
-
     try {
-      const orders = await Order.find({ customer: req.user._id })
-        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
-        .skip(rangeExp.length && rangeExp[0])
-        .sort(sort);
-
+      const orders = await Order.find({ customer: req.user._id }).select({
+        status: 1,
+        createdAt: 1,
+        deliveryDate: 1,
+        total: 1,
+      });
       return res.status(200).json(orders);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-  })
-  .get("/count", async (req, res) => {
-    try {
-      // const count = await Order.estimatedDocumentCount({ user: req.user._id });
-      const count = await Order.countDocuments({ user: req.user._id });
-
-      return res.status(200).json(count);
     } catch (err) {
       console.log(err);
       return res.status(500).send(err);
@@ -34,23 +22,72 @@ route
   })
   .get("/:id", async (req, res) => {
     try {
-      const order = await Order.findByIdAndUpdate(req.params.id, {
-        $inc: { view: 1 },
-      }).populate("company");
+      const order = await Order.findById(req.params.id).populate({
+        path: "products.product",
+        select: { name: 1, images: 1, price: 1 },
+      });
 
       return res.status(200).json(order);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Order profile does not exist." });
+      res.status(500).send({ message: "Order does not exist." });
     }
   })
   .post("/", async (req, res) => {
     try {
+      const productsArray = await Product.find({
+        _id: { $in: req.body?.products?.map((i) => i.product) },
+      }).select({ price: 1 });
+
+      let products = [];
+      let totalPrice = req.body?.deliveryFee;
+
+      Object.entries(productsArray)?.map((item) => {
+        let newObj = req.body.products?.find(
+          (p) => p?.product === item[1]?._id.toString()
+        );
+        newObj["price"] = item[1].price;
+        totalPrice += newObj.quantity * newObj.price;
+        products.push(newObj);
+      });
+
+      // Create a lookup object for products and their prices
+      // const productPriceLookup = {};
+      // productsArray.forEach((product) => {
+      //   productPriceLookup[product._id] = product.price;
+      // });
+
+      // // Calculate total price based on quantity
+      // let totalPrice = 0;
+      // req.body?.products.forEach((quantityObj) => {
+      //   const productId = quantityObj.product;
+      //   const quantity = quantityObj.quantity;
+      //   const price = productPriceLookup[productId];
+      //   if (price) {
+      //     totalPrice += quantity * price;
+      //   }
+      // });
+
       // const products = {
       //   product:
       //   variant:
       //   quantity :
       // }
+
+      // const order = await Order.create({
+      //   ...req.body,
+      //   createdBy: req?.user?._id,
+      // });
+
+      // productId: { $in: productIds }
+
+      // let productsWithPrice = [];
+
+      // products?.map( p => {
+      //   if(p?._id)
+      // })
+
+      //
 
       const data = {
         invoiceNumber: randomNumber(),
@@ -60,26 +97,19 @@ route
             ? "processing"
             : "pendingPayment",
 
-        // producst
-        // total
-
+        // product
+        total: totalPrice,
+        customer: req.user._id,
         ...req.body,
+        products: products,
         // customer
         // coupon - check validity
         // paymentMethod
         // if bkash trxId
       };
 
-      console.log(data);
-
-      // const order = await Order.create({
-      //   ...req.body,
-      //   createdBy: req?.user?._id,
-      // });
-
-      const order = {};
-
-      console.log(order);
+      // console.log(data);
+      const order = await Order.create(data);
 
       return res.status(200).json(order);
     } catch (err) {

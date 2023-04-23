@@ -12,8 +12,7 @@ const { AddressBookSchema } = require("./addressBook");
 // Refunded – Grey
 
 const productWithPriceSchema = new Schema({
-  // product: { type: ObjectId, ref: "Product", required: true },
-  product: { type: String, required: true },
+  product: { type: ObjectId, ref: "Product", required: true },
   variant: { type: String, default: "default" },
 
   quantity: { type: Number, required: true },
@@ -25,12 +24,13 @@ const OrderSchema = new Schema(
     invoiceNumber: { type: String, required: true, unique: true },
     customer: { type: ObjectId, ref: "User", required: true },
     deliveryAddress: { AddressBookSchema },
+    deliveryDate: Date,
 
     products: [productWithPriceSchema],
 
     total: { type: Number, required: true },
 
-    coupon: { type: ObjectId, ref: "Coupon", required: true },
+    coupon: { type: ObjectId, ref: "Coupon", required: false },
     paymentMethod: {
       type: String,
       enum: ["bank", "bkash", "rocket", "nogod", "cashOnDelivery", "other"],

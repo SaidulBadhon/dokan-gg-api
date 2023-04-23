@@ -23,6 +23,7 @@ const adminProduct = require("./admin/adminProduct");
 // public routes
 const publicStore = require("./public/publicStore");
 const publicProduct = require("./public/publicProduct");
+const publicOrder = require("./public/publicOrder");
 
 // --------------------------------------- \\
 
@@ -33,19 +34,20 @@ router.use("/notification", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
 router.use("/addressBook", allowIfLogin, addressBook);
-router.use("/orders", order);
+router.use("/orders", allowIfLogin, order);
 
 // sellers routes
 router.use("/sellers/stores", allowIfLogin, sellerStore);
 router.use("/sellers/products", allowIfLogin, sellerProduct);
 
 // admin routes
-router.use("/admin/categories", adminCategory);
 router.use("/admin/stores", allowIfLogin, adminStore);
 router.use("/admin/products", allowIfLogin, adminProduct);
+router.use("/admin/categories", allowIfLogin, adminCategory);
 
 // public routes
 router.use("/public/stores", publicStore);
 router.use("/public/products", publicProduct);
+router.use("/public/orders", publicOrder);
 
 module.exports = router;

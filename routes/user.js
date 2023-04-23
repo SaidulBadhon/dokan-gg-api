@@ -58,7 +58,7 @@ route
         return res.status(200).json({ ...user.toObject(), accessToken });
       }
     } catch (err) {
-      res.status(500).send({ error: "User does not exist." });
+      res.status(500).send({ message: "User does not exist." });
     }
   })
   .get("/:id/addressBook", async (req, res) => {
@@ -68,7 +68,7 @@ route
       return res.status(200).json(addressBook);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
+      res.status(500).send({ message: "Address book does not exist." });
     }
   })
   .delete("/:id/addressBook/:addressBookId", async (req, res) => {
@@ -78,7 +78,7 @@ route
       return res.status(200).json(addressBook);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
+      res.status(500).send({ message: "Address book does not exist." });
     }
   })
   .post("/acceptEULA", async (req, res, next) => {
