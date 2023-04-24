@@ -44,10 +44,16 @@ const OrderSchema = new Schema(
     status: {
       type: String,
       enum: [
+        "pending",
+
         "pendingPayment",
         "failed",
 
         "processing",
+
+        "shipped",
+        "delivered",
+
         "completed",
 
         "onHold",
