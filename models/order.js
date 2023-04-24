@@ -22,7 +22,7 @@ const productWithPriceSchema = new Schema({
 const OrderSchema = new Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true },
-    customer: { type: ObjectId, ref: "User", required: true },
+    customer: { type: ObjectId, ref: "User", required: false },
     deliveryAddress: AddressBookSchema,
     deliveryDate: Date,
 
