@@ -12,12 +12,12 @@ const sendEmail = async (emailConfig) => {
     from: process.env.FROM_EMAIL,
     templateId: "d-ce573c7d61294069b083ba52b811d63e",
     dynamic_template_data: {
-      subject: `Here is your OTP code for CampusJapan: ${otp}`,
+      subject: `Here is your OTP code for Dokan.gg: ${otp}`,
       username,
       otp,
       link,
     },
-    subject: `Here is your OTP code for CampusJapan: ${otp}`,
+    subject: `Here is your OTP code for Dokan.gg: ${otp}`,
     // text: body,
     // html: body,
   };

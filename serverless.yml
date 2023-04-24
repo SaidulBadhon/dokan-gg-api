@@ -15,7 +15,7 @@ provider:
     JWT_SECRET: 6XGLsXHlT5ApKZhW
     APP_BASE_URL: https://dokan.gg
     SENDGRID_API_KEY: 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
-    FROM_EMAIL: "Team Dokan <no-reply@campusjapan.com>"
+    FROM_EMAIL: "Team Dokan <no-reply@dokan.gg>"
 
 functions:
   app:
