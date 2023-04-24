@@ -8,12 +8,14 @@ const randomNumber = require("../utils/randomNumber");
 route
   .get("/", async (req, res) => {
     try {
-      const orders = await Order.find({ customer: req.user._id }).select({
-        status: 1,
-        createdAt: 1,
-        deliveryDate: 1,
-        total: 1,
-      });
+      const orders = await Order.find({ customer: req.user._id })
+        .select({
+          status: 1,
+          createdAt: 1,
+          deliveryDate: 1,
+          total: 1,
+        })
+        .sort({ createdAt: -1 });
       return res.status(200).json(orders);
     } catch (err) {
       console.log(err);
@@ -40,74 +42,37 @@ route
       }).select({ price: 1 });
 
       let products = [];
-      let totalPrice = req.body?.deliveryFee;
+      let subTotal = 0.0;
 
       Object.entries(productsArray)?.map((item) => {
         let newObj = req.body.products?.find(
           (p) => p?.product === item[1]?._id.toString()
         );
         newObj["price"] = item[1].price;
-        totalPrice += newObj.quantity * newObj.price;
+        subTotal += newObj.quantity * newObj.price;
         products.push(newObj);
       });
 
-      // Create a lookup object for products and their prices
-      // const productPriceLookup = {};
-      // productsArray.forEach((product) => {
-      //   productPriceLookup[product._id] = product.price;
-      // });
-
-      // // Calculate total price based on quantity
-      // let totalPrice = 0;
-      // req.body?.products.forEach((quantityObj) => {
-      //   const productId = quantityObj.product;
-      //   const quantity = quantityObj.quantity;
-      //   const price = productPriceLookup[productId];
-      //   if (price) {
-      //     totalPrice += quantity * price;
-      //   }
-      // });
-
-      // const products = {
-      //   product:
-      //   variant:
-      //   quantity :
-      // }
-
-      // const order = await Order.create({
-      //   ...req.body,
-      //   createdBy: req?.user?._id,
-      // });
-
-      // productId: { $in: productIds }
-
-      // let productsWithPrice = [];
-
-      // products?.map( p => {
-      //   if(p?._id)
-      // })
-
-      //
-
       const data = {
         invoiceNumber: randomNumber(),
+        customer: req.user._id,
 
         status:
           req.body?.paymentMethod === "cashOnDelivery"
             ? "processing"
             : "pendingPayment",
 
-        // product
-        total: totalPrice,
-        customer: req.user._id,
+        subTotal,
+
+        total:
+          subTotal + (req.body?.deliveryFee || 80) - (req.body?.discount || 0),
         ...req.body,
         products: products,
-        // customer
+
         // coupon - check validity
         // paymentMethod
         // if bkash trxId
       };
-
       // console.log(data);
       const order = await Order.create(data);
 

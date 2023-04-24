@@ -23,11 +23,14 @@ const OrderSchema = new Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true },
     customer: { type: ObjectId, ref: "User", required: true },
-    deliveryAddress: { AddressBookSchema },
+    deliveryAddress: AddressBookSchema,
     deliveryDate: Date,
 
     products: [productWithPriceSchema],
 
+    subTotal: { type: Number, required: true },
+    deliveryFee: { type: Number, required: true, default: 80 },
+    discount: { type: Number, required: true, default: 0 },
     total: { type: Number, required: true },
 
     coupon: { type: ObjectId, ref: "Coupon", required: false },
