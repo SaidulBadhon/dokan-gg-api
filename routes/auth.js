@@ -1,6 +1,6 @@
+const axios = require("axios");
 const express = require("express");
 const bcrypt = require("bcryptjs-then");
-const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Customer = require("../models/customer");
 const Store = require("../models/store");
@@ -14,7 +14,6 @@ const User = require("../models/user");
 // const Token = require("../models/token");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../utils/sendEmail");
-const axios = require("axios");
 const getAccessToken = require("../utils/getAccessToken");
 
 const router = express.Router();
@@ -27,36 +26,72 @@ async function hashPassword(password) {
   return await bcrypt.hash(password, 10);
 }
 
-async function generateValidationToken(user) {
-  // const user = await User.findOne({ email });
-  console.log(user);
+// async function generateValidationToken(user) {
+//   // const user = await User.findOne({ email });
+//   console.log(user);
 
-  // if (!user) throw new Error("User does not exist");
-  // let token = await Token.findOne({ userId: user?.id });
-  // if (token) await token.deleteOne();
-  let resetToken = crypto.randomBytes(32).toString("hex");
+//   // if (!user) throw new Error("User does not exist");
+//   // let token = await Token.findOne({ userId: user?.id });
+//   // if (token) await token.deleteOne();
+//   let resetToken = crypto.randomBytes(32).toString("hex");
 
-  const otp = generateOTP();
+//   const otp = generateOTP();
 
-  // await new Token({
-  //   userId: user?.id,
-  //   token: resetToken,
-  //   otp,
-  //   createdAt: new Date(),
-  // }).save();
+//   // await new Token({
+//   //   userId: user?.id,
+//   //   token: resetToken,
+//   //   otp,
+//   //   createdAt: new Date(),
+//   // }).save();
 
-  // TODO: will add Email send feature here when we have email support api
-  const responce = await sendEmail({
-    to: user?.email,
-    username: `${user?.firstName} ${user?.lastName}`,
-    otp: otp,
-    link: `${process.env.APP_BASE_URL}/login/token?token=${resetToken}`,
-  });
+//   // TODO: will add Email send feature here when we have email support api
+//   const responce = await sendEmail({
+//     to: user?.email,
+//     username: `${user?.firstName} ${user?.lastName}`,
+//     otp: otp,
+//     link: `${process.env.APP_BASE_URL}/login/token?token=${resetToken}`,
+//   });
 
-  console.log("EMAIL RESPONCE : ", responce);
+//   console.log("EMAIL RESPONCE : ", responce);
 
-  return responce;
-}
+//   return responce;
+// }
+
+const getExtraData = async (user, accessToken) => {
+  //
+
+  let rtn;
+
+  if (["seller", "manager", "employee"].includes(user?.role)) {
+    let stores = await Store.find({
+      $or: [
+        { owner: user?._id },
+        { managers: { $in: [user?._id] } },
+        { employees: { $in: [user?._id] } },
+      ],
+    });
+
+    rtn = {
+      ...user.toObject(),
+      accessToken,
+      stores,
+    };
+  } else if (user?.role === "buyer") {
+    let customer = await Customer.findOne({ user: user._id });
+    if (!customer) customer = await Customer.create({ user: user._id });
+
+    rtn = {
+      ...user.toObject(),
+      accessToken,
+      customer,
+    };
+  } else {
+    rtn = { ...user.toObject(), accessToken };
+  }
+  //
+
+  return rtn;
+};
 
 router
   .post("/login", async (req, res, next) => {
@@ -84,11 +119,14 @@ router
       if (!validPassword) return next(new Error("Password is not correct"));
       const accessToken = getAccessToken(user._id);
 
-      if (["seller", "manager", "moderator"].includes(user?.role)) {
-        let stores = await Store.find({ owner: user._id });
-        if (!stores && user?.role === "seller") {
-          stores = await Store.create({ owner: user._id });
-        }
+      if (["seller", "manager", "employee"].includes(user?.role)) {
+        let stores = await Store.find({
+          $or: [
+            { owner: user?._id },
+            { managers: { $in: [user?._id] } },
+            { employees: { $in: [user?._id] } },
+          ],
+        });
 
         return res.status(200).json({
           ...user.toObject(),
@@ -111,25 +149,8 @@ router
       next(error);
     }
   })
-  .post("/logout", async (req, res) => {
-    const { userId, token } = req.body;
-    console.log("=====> ", userId, token);
-    // log user login
-    await UserLogin.findOneAndUpdate(
-      {
-        userId,
-        token,
-      },
-      {
-        logoutAt: new Date(),
-      }
-    );
-
-    res.status(200).send("success");
-  })
   .post("/signup", async (req, res, next) => {
     try {
-      console.log(req.body);
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
       const user = await User.create({
@@ -146,27 +167,25 @@ router
       // const user = await saveAccessToken(newUser);
       // generateValidationToken(user);
 
-      if (["seller", "manager", "moderator"].includes(user?.role)) {
-        let store = await Store.create({ [user?.role]: user._id });
+      // if (user?.role === "buyer") {
+      //   let customer = await Customer.findOne({ user: user._id });
+      //   if (!customer) customer = await Customer.create({ user: user._id });
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          store,
-        });
-      } else if (user?.role === "buyer") {
-        let customer = await Customer.create({ user: user._id });
+      //   return res.status(200).json({
+      //     ...user.toObject(),
+      //     accessToken,
+      //     customer,
+      //   });
+      // } else {
+      //   return res.status(200).json({ ...user.toObject(), accessToken });
+      // }
 
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          customer,
-        });
-      } else {
-        return res.status(200).json({ ...user.toObject(), accessToken });
-      }
+      // generateValidationToken(user)
 
-      // res.status(200).json({ status: "success" });
+      res.status(200).json({
+        message:
+          "Account created successfully, Please verify your email to continue.",
+      });
     } catch (err) {
       console.log(err);
       next(err);
@@ -272,23 +291,46 @@ router
         .then(async (userInfo) => {
           console.log(userInfo.data);
 
-          const user = await User.findOne({ email: userInfo.data?.email });
+          const user = await User.findOneAndUpdate(
+            { email: userInfo.data?.email },
+            { emailVerified: true },
+            { new: true }
+          );
 
           if (user) {
             const accessToken = getAccessToken(user._id);
-            return res.status(200).json({ ...user.toObject(), accessToken });
+
+            getExtraData(user, accessToken)
+              .then((rx) => {
+                return res.status(200).json(rx);
+              })
+              .catch((err) => {
+                next(err);
+              });
           } else {
             const newUser = await User.create({
-              lastName: userInfo.data?.given_name,
-              firstName: userInfo.data?.family_name,
+              firstName: userInfo.data?.given_name,
+              lastName: userInfo.data?.family_name,
               userName:
                 (userInfo.data?.given_name + userInfo.data?.family_name)
                   .trim()
                   .replace(/ /g, "-") + Date.now(),
               email: userInfo.data?.email,
+              avatar: reuserInfo.data?.picture,
               role: req.body.role,
               emailVerified: userInfo.data?.email_verified,
+              provider: "google",
+              googleId: userInfo.data?.sub,
             });
+            const accessToken = getAccessToken(newUser._id);
+
+            getExtraData(newUser, accessToken)
+              .then((rx) => {
+                return res.status(200).json(rx);
+              })
+              .catch((err) => {
+                next(err);
+              });
           }
         })
         .catch((error) => {
@@ -299,8 +341,54 @@ router
       console.log(err);
       return res.status(500).send(err);
     }
-  });
+  })
+  .post("/facebook", async (req, res, next) => {
+    try {
+      const user = await User.findOneAndUpdate(
+        { email: req.body?.email },
+        { emailVerified: true },
+        { new: true }
+      );
 
+      if (user) {
+        const accessToken = getAccessToken(user._id);
+
+        getExtraData(user, accessToken)
+          .then((rx) => {
+            return res.status(200).json(rx);
+          })
+          .catch((err) => {
+            next(err);
+          });
+        // console.log(sx);
+      } else {
+        const newUser = await User.create({
+          firstName: req.body.first_name,
+          lastName: req.body.last_name,
+          userName:
+            (req.body.first_name + req.body.last_name)
+              .trim()
+              .replace(/ /g, "-") + Date.now(),
+          email: req.body?.email,
+          avatar: req.body?.picture?.data?.url,
+          role: req.body?.role,
+          emailVerified: true,
+          provider: "facebook",
+          facebookId: req.body.id,
+        });
+
+        const accessToken = getAccessToken(newUser._id);
+
+        getExtraData(newUser, accessToken)
+          .then((rx) => {
+            return res.status(200).json(rx);
+          })
+          .catch((err) => {
+            next(err);
+          });
+      }
+    } catch (err) {}
+  });
 // .post("/:id/resetPassword/request", async (req, res, next) => {
 //   const user = await User.findOne({ email });
 

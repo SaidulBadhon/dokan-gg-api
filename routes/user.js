@@ -29,7 +29,7 @@ route
       const user = await User.findById(req.params.id);
       accessToken = getAccessToken(user._id);
 
-      if (["seller", "manager", "moderator"].includes(user?.role)) {
+      if (["seller", "manager", "employee"].includes(user?.role)) {
         let stores = await Store.find({ owner: user._id }).select({
           owner: 0,
           managers: 0,

@@ -15,8 +15,17 @@ const UserSchema = new Schema(
 
     role: {
       type: String,
-      enum: ["super", "admin", "seller", "manager", "moderator", "buyer"],
+      enum: ["super", "admin", "seller", "manager", "employee", "buyer"],
       default: "admin",
+    },
+
+    facebookId: { type: String, required: false, unique: true },
+    googleId: { type: String, required: false, unique: true },
+
+    provider: {
+      type: String,
+      enum: ["facebook", "google", "email", "number"],
+      default: "email",
     },
 
     isActive: { type: Boolean, default: true },
