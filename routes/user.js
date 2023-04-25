@@ -1,16 +1,11 @@
 const express = require("express");
 const route = express.Router();
-const jwt = require("jsonwebtoken");
 const Customer = require("../models/customer");
 const Store = require("../models/store");
 
 const User = require("../models/user");
 const { AddressBook } = require("../models/addressBook");
-
-const getAccessToken = (userId) =>
-  jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
+const getAccessToken = require("../utils/getAccessToken");
 
 route
   .get("/", async (req, res) => {

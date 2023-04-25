@@ -14,6 +14,8 @@ const User = require("../models/user");
 // const Token = require("../models/token");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../utils/sendEmail");
+const axios = require("axios");
+const getAccessToken = require("../utils/getAccessToken");
 
 const router = express.Router();
 
@@ -23,23 +25,6 @@ async function validatePassword(plainPassword, hashedPassword) {
 
 async function hashPassword(password) {
   return await bcrypt.hash(password, 10);
-}
-
-const getAccessToken = (userId) =>
-  jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
-    expiresIn: "30d",
-  });
-
-async function saveAccessToken(newUser) {
-  const accessToken = getAccessToken(newUser._id);
-  newUser.accessToken = accessToken;
-  newUser.userName = `${slugify(newUser.email)}-${Math.floor(
-    1000 + Math.random() * 9000
-  )}`;
-
-  await newUser.save();
-
-  return newUser;
 }
 
 async function generateValidationToken(user) {
@@ -147,7 +132,7 @@ router
       console.log(req.body);
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
-      const newUser = new User({
+      const user = await User.create({
         lastName,
         firstName,
         userName: (firstName + lastName).trim().replace(/ /g, "-") + Date.now(),
@@ -155,14 +140,14 @@ router
         password: hashedPassword,
         role,
 
-        emailVerified: true,
+        emailVerified: false,
       });
 
-      const user = await saveAccessToken(newUser);
+      // const user = await saveAccessToken(newUser);
       // generateValidationToken(user);
 
       if (["seller", "manager", "moderator"].includes(user?.role)) {
-        let store = await Store.create({ owner: user._id });
+        let store = await Store.create({ [user?.role]: user._id });
 
         return res.status(200).json({
           ...user.toObject(),
@@ -276,6 +261,43 @@ router
     } catch (err) {
       console.log(err);
       next(err);
+    }
+  })
+  .post("/google", async (req, res, next) => {
+    try {
+      axios
+        .get("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${req.body.access_token}` },
+        })
+        .then(async (userInfo) => {
+          console.log(userInfo.data);
+
+          const user = await User.findOne({ email: userInfo.data?.email });
+
+          if (user) {
+            const accessToken = getAccessToken(user._id);
+            return res.status(200).json({ ...user.toObject(), accessToken });
+          } else {
+            const newUser = await User.create({
+              lastName: userInfo.data?.given_name,
+              firstName: userInfo.data?.family_name,
+              userName:
+                (userInfo.data?.given_name + userInfo.data?.family_name)
+                  .trim()
+                  .replace(/ /g, "-") + Date.now(),
+              email: userInfo.data?.email,
+              role: req.body.role,
+              emailVerified: userInfo.data?.email_verified,
+            });
+          }
+        })
+        .catch((error) => {
+          // console.log(error);
+          return res.status(404).send(error);
+        });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send(err);
     }
   });
 
