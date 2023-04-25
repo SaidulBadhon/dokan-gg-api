@@ -296,10 +296,11 @@ router
             { emailVerified: true },
             { new: true }
           );
+          console.log("YOLO", user);
 
           if (user) {
             const accessToken = getAccessToken(user._id);
-
+            console.log("SX", user);
             getExtraData(user, accessToken)
               .then((rx) => {
                 return res.status(200).json(rx);
@@ -308,6 +309,7 @@ router
                 next(err);
               });
           } else {
+            console.log("xxxxxx");
             const newUser = await User.create({
               firstName: userInfo.data?.given_name,
               lastName: userInfo.data?.family_name,
@@ -322,6 +324,7 @@ router
               provider: "google",
               googleId: userInfo.data?.sub,
             });
+            console.log("newUser", newUser);
             const accessToken = getAccessToken(newUser._id);
 
             getExtraData(newUser, accessToken)
