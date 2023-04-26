@@ -16,13 +16,11 @@ route
       return res.status(500).send(err);
     }
   })
-  .get("/:id", async (req, res) => {
+  .get("/:parentId", async (req, res) => {
     try {
-      const category = await Category.findByIdAndUpdate(req.params.id, {
-        $inc: { view: 1 },
-      });
+      const categories = await Category.find({ parentId: req.params.parentId });
 
-      return res.status(200).json(category);
+      return res.status(200).json(categories);
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Category does not exist." });
