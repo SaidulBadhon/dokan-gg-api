@@ -6,6 +6,8 @@ const Store = require("../models/store");
 const User = require("../models/user");
 const { AddressBook } = require("../models/addressBook");
 const getAccessToken = require("../utils/getAccessToken");
+const hashPassword = require("../utils/hashPassword");
+const validatePassword = require("../utils/validatePassword");
 
 route
   .get("/", async (req, res) => {
@@ -84,6 +86,34 @@ route
       return res.status(200).send(updateUser);
     } catch (err) {
       return res.status(500).send(err);
+    }
+  })
+  .post("/changePassword", async (req, res, next) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+
+      const user = await User.findById(req.user._id);
+
+      if (user.password) {
+        const validPassword = await validatePassword(
+          oldPassword,
+          user.password
+        );
+        console.log({ validPassword });
+
+        if (!validPassword) return next(new Error("Password is not correct"));
+      }
+
+      const hashedPassword = await hashPassword(newPassword);
+
+      const updatedUser = await User.findByIdAndUpdate(user?._id, {
+        password: hashedPassword,
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (err) {
+      console.log(err);
+      next(err);
     }
   })
   .put("/", async (req, res) => {

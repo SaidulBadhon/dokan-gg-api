@@ -16,7 +16,7 @@ const UserSchema = new Schema(
     role: {
       type: String,
       enum: ["super", "admin", "seller", "manager", "employee", "buyer"],
-      default: "admin",
+      default: "buyer",
     },
 
     facebookId: { type: String, required: false, unique: true },

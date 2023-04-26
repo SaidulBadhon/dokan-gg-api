@@ -50,7 +50,7 @@ route
         createdBy: req?.user?._id,
       });
 
-      return res.status(200).json(categories);
+      return res.status(200).json(category);
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Fail to create a category" });

@@ -1,7 +1,5 @@
 const axios = require("axios");
 const express = require("express");
-const bcrypt = require("bcryptjs-then");
-const crypto = require("crypto");
 const Customer = require("../models/customer");
 const Store = require("../models/store");
 
@@ -15,16 +13,10 @@ const User = require("../models/user");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../utils/sendEmail");
 const getAccessToken = require("../utils/getAccessToken");
+const hashPassword = require("../utils/hashPassword");
+const validatePassword = require("../utils/validatePassword");
 
 const router = express.Router();
-
-async function validatePassword(plainPassword, hashedPassword) {
-  return await bcrypt.compare(plainPassword, hashedPassword);
-}
-
-async function hashPassword(password) {
-  return await bcrypt.hash(password, 10);
-}
 
 // async function generateValidationToken(user) {
 //   // const user = await User.findOne({ email });
@@ -153,7 +145,7 @@ router
     try {
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
-      const user = await User.create({
+      await User.create({
         lastName,
         firstName,
         userName: (firstName + lastName).trim().replace(/ /g, "-") + Date.now(),
@@ -191,28 +183,6 @@ router
       next(err);
     }
   })
-  .post("/:id/changePassword", async (req, res, next) => {
-    try {
-      const { oldPassword, newPassword } = req.body;
-
-      const user = await User.findById(req.params.id);
-
-      const validPassword = await validatePassword(oldPassword, user.password);
-
-      if (!validPassword) return next(new Error("Password is not correct"));
-
-      const hashedPassword = await hashPassword(newPassword);
-
-      const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-        password: hashedPassword,
-      });
-
-      res.status(200).json(updatedUser);
-    } catch (err) {
-      console.log(err);
-      next(err);
-    }
-  })
   .get("/validation/request/:email/", async (req, res, next) => {
     try {
       const user = await User.findOne({ email: req.params.email });
@@ -238,11 +208,11 @@ router
 
       let token;
 
-      // if (tokenString.length <= 6) {
-      //   token = await Token.findOne({ otp: tokenString });
-      // } else {
-      //   token = await Token.findOne({ token: tokenString });
-      // }
+      if (tokenString.length <= 6) {
+        token = await Token.findOne({ otp: tokenString });
+      } else {
+        token = await Token.findOne({ token: tokenString });
+      }
       if (!token) return next(new Error("Token does not exist"));
 
       const user = await User.findByIdAndUpdate(token.userId, {
@@ -255,48 +225,49 @@ router
 
       const accessToken = getAccessToken(user._id);
 
-      // if (user?.role === "applicant") {
-      //   let applicant = await Applicant.findOne({ user: user._id });
-      //   if (!applicant) applicant = await Applicant.create({ user: user._id });
-
-      //   return res.status(200).json({
-      //     ...user.toObject(),
-      //     accessToken,
-      //     applicant,
-      //   });
-      // } else if (user?.role === "company") {
-      //   let company = await Company.findOne({ user: user._id });
-      //   if (!company) company = await Company.create({ user: user._id });
-
-      //   return res.status(200).json({
-      //     ...user.toObject(),
-      //     accessToken,
-      //     company,
-      //   });
-      // } else {
-      // if (user?.role === "admin") {
-      return res.status(200).json({ ...user.toObject(), accessToken });
-      // }
+      getExtraData(user, accessToken)
+        .then((rx) => {
+          return res.status(200).json(rx);
+        })
+        .catch((err) => {
+          next(err);
+        });
     } catch (err) {
-      console.log(err);
+      console.log(JSON.stringify(err));
       next(err);
     }
   })
   .post("/google", async (req, res, next) => {
     try {
-      axios
+      await axios
         .get("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: { Authorization: `Bearer ${req.body.access_token}` },
         })
         .then(async (userInfo) => {
           console.log(userInfo.data);
 
-          const user = await User.findOneAndUpdate(
+          let user = await User.findOneAndUpdate(
             { email: userInfo.data?.email },
             { emailVerified: true },
             { new: true }
           );
-          console.log("YOLO", user);
+
+          // googleId: userInfo.data?.sub
+
+          if (
+            (!user?.avatar && userInfo.data?.picture) ||
+            user?.googleId !== userInfo.data?.sub
+          ) {
+            let update = {};
+            update["avatar"] = userInfo.data?.picture;
+            update["googleId"] = userInfo.data?.sub;
+
+            console.log("user update : ", update);
+
+            user = await User.findByIdAndUpdate(user?._id, update, {
+              new: true,
+            });
+          }
 
           if (user) {
             const accessToken = getAccessToken(user._id);
@@ -309,22 +280,27 @@ router
                 next(err);
               });
           } else {
-            console.log("xxxxxx");
+            console.log(
+              "xxxxxx - ",
+              (userInfo.data?.given_name + (userInfo.data?.family_name || ""))
+                .trim()
+                .replace(/ /g, "-") + Date.now()
+            );
             const newUser = await User.create({
               firstName: userInfo.data?.given_name,
-              lastName: userInfo.data?.family_name,
+              lastName: userInfo.data?.family_name || "",
               userName:
-                (userInfo.data?.given_name + userInfo.data?.family_name)
+                (userInfo.data?.given_name + (userInfo.data?.family_name || ""))
                   .trim()
                   .replace(/ /g, "-") + Date.now(),
               email: userInfo.data?.email,
-              avatar: reuserInfo.data?.picture,
-              role: req.body.role,
+              avatar: userInfo.data?.picture,
+              role: req.body.role || "buyer",
               emailVerified: userInfo.data?.email_verified,
               provider: "google",
               googleId: userInfo.data?.sub,
             });
-            console.log("newUser", newUser);
+
             const accessToken = getAccessToken(newUser._id);
 
             getExtraData(newUser, accessToken)
@@ -347,11 +323,26 @@ router
   })
   .post("/facebook", async (req, res, next) => {
     try {
-      const user = await User.findOneAndUpdate(
+      let user = await User.findOneAndUpdate(
         { email: req.body?.email },
         { emailVerified: true },
         { new: true }
       );
+
+      if (
+        (!user?.avatar && req.body?.picture?.data?.url) ||
+        user?.facebookId !== req.body.id
+      ) {
+        let update = {};
+        update["avatar"] = req.body?.picture?.data?.url;
+        update["facebookId"] = req.body.id;
+
+        console.log("user update : ", update);
+
+        user = await User.findByIdAndUpdate(user?._id, update, {
+          new: true,
+        });
+      }
 
       if (user) {
         const accessToken = getAccessToken(user._id);
