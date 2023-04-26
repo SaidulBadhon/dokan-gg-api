@@ -24,6 +24,7 @@ const adminProduct = require("./admin/adminProduct");
 const publicStore = require("./public/publicStore");
 const publicProduct = require("./public/publicProduct");
 const publicOrder = require("./public/publicOrder");
+const publicCategory = require("./public/publicCategory");
 
 // --------------------------------------- \\
 
@@ -43,11 +44,12 @@ router.use("/sellers/products", allowIfLogin, sellerProduct);
 // admin routes
 router.use("/admin/stores", allowIfLogin, adminStore);
 router.use("/admin/products", allowIfLogin, adminProduct);
-router.use("/admin/categories", allowIfLogin, adminCategory);
+router.use("/admin/categories", adminCategory);
 
 // public routes
 router.use("/public/stores", publicStore);
 router.use("/public/products", publicProduct);
 router.use("/public/orders", publicOrder);
+router.use("/public/categories", publicCategory);
 
 module.exports = router;

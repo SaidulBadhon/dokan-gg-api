@@ -65,14 +65,9 @@ route
       // });
 
       array?.map(async (i) => {
-        let parent;
+        // let parent;
 
-        if (i?.parentId) {
-          parent = await Category.findOne({ localId: i?.parentId });
-          await Category.create({ ...i, parentId: parent?._id });
-        } else {
-          await Category.create(i);
-        }
+        await Category.create({ ...i, id: i.localId });
       });
 
       return res.status(200).json({ H: 1 });
