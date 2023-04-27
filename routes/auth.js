@@ -102,9 +102,7 @@ router
         });
       }
       if (!user.isActive) {
-        return next(
-          new Error("Your account has been deactivated by team campusJapan")
-        );
+        return next(new Error("Your account has been disabled"));
       }
 
       const validPassword = await validatePassword(password, user.password);
@@ -271,7 +269,11 @@ router
 
           if (user) {
             const accessToken = getAccessToken(user._id);
-            console.log("SX", user);
+
+            if (!user.isActive) {
+              return next(new Error("Your account has been disabled"));
+            }
+
             getExtraData(user, accessToken)
               .then((rx) => {
                 return res.status(200).json(rx);
@@ -280,12 +282,6 @@ router
                 next(err);
               });
           } else {
-            console.log(
-              "xxxxxx - ",
-              (userInfo.data?.given_name + (userInfo.data?.family_name || ""))
-                .trim()
-                .replace(/ /g, "-") + Date.now()
-            );
             const newUser = await User.create({
               firstName: userInfo.data?.given_name,
               lastName: userInfo.data?.family_name || "",
@@ -346,6 +342,10 @@ router
 
       if (user) {
         const accessToken = getAccessToken(user._id);
+
+        if (!user.isActive) {
+          return next(new Error("Your account has been disabled"));
+        }
 
         getExtraData(user, accessToken)
           .then((rx) => {
