@@ -2,14 +2,10 @@ const axios = require("axios");
 const express = require("express");
 const Customer = require("../models/customer");
 const Store = require("../models/store");
+const Token = require("../models/token");
+const crypto = require("crypto");
 
-// const sgMail = require("@sendgrid/mail");
-// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-const slugify = require("../utils/slugify");
-// const Company = require("../models/company");
 const User = require("../models/user");
-// const Token = require("../models/token");
 const generateOTP = require("../utils/generateOTP");
 const sendEmail = require("../utils/sendEmail");
 const getAccessToken = require("../utils/getAccessToken");
@@ -18,36 +14,35 @@ const validatePassword = require("../utils/validatePassword");
 
 const router = express.Router();
 
-// async function generateValidationToken(user) {
-//   // const user = await User.findOne({ email });
-//   console.log(user);
+async function generateValidationToken(user) {
+  // const user = await User.findOne({ email });
+  console.log(user);
 
-//   // if (!user) throw new Error("User does not exist");
-//   // let token = await Token.findOne({ userId: user?.id });
-//   // if (token) await token.deleteOne();
-//   let resetToken = crypto.randomBytes(32).toString("hex");
+  if (!user) throw new Error("User does not exist");
+  await Token.findOneAndDelete({ userId: user?._id });
 
-//   const otp = generateOTP();
+  let resetToken = crypto.randomBytes(32).toString("hex");
 
-//   // await new Token({
-//   //   userId: user?.id,
-//   //   token: resetToken,
-//   //   otp,
-//   //   createdAt: new Date(),
-//   // }).save();
+  const otp = generateOTP();
 
-//   // TODO: will add Email send feature here when we have email support api
-//   const responce = await sendEmail({
-//     to: user?.email,
-//     username: `${user?.firstName} ${user?.lastName}`,
-//     otp: otp,
-//     link: `${process.env.APP_BASE_URL}/login/token?token=${resetToken}`,
-//   });
+  await new Token({
+    userId: user?._id,
+    token: resetToken,
+    otp,
+  }).save();
 
-//   console.log("EMAIL RESPONCE : ", responce);
+  // TODO: will add Email send feature here when we have email support api
+  const responce = await sendEmail({
+    to: user?.email,
+    username: `${user?.firstName} ${user?.lastName}`,
+    otp: otp,
+    link: `${process.env.APP_BASE_URL}/login/token?token=${resetToken}`,
+  });
 
-//   return responce;
-// }
+  console.log("EMAIL RESPONCE : ", responce);
+
+  return responce;
+}
 
 const getExtraData = async (user, accessToken) => {
   //
@@ -93,7 +88,7 @@ router
 
       if (!user) return next(new Error("Email does not exist"));
       if (!user.emailVerified) {
-        // generateValidationToken(user?.email);
+        generateValidationToken(user?.email);
 
         return res.status(404).json({
           redirect: true,
@@ -109,32 +104,13 @@ router
       if (!validPassword) return next(new Error("Password is not correct"));
       const accessToken = getAccessToken(user._id);
 
-      if (["seller", "manager", "employee"].includes(user?.role)) {
-        let stores = await Store.find({
-          $or: [
-            { owner: user?._id },
-            { managers: { $in: [user?._id] } },
-            { employees: { $in: [user?._id] } },
-          ],
+      getExtraData(user, accessToken)
+        .then((rx) => {
+          return res.status(200).json(rx);
+        })
+        .catch((err) => {
+          next(err);
         });
-
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          stores,
-        });
-      } else if (user?.role === "buyer") {
-        let customer = await Customer.findOne({ user: user._id });
-        if (!customer) customer = await Customer.create({ user: user._id });
-
-        return res.status(200).json({
-          ...user.toObject(),
-          accessToken,
-          customer,
-        });
-      } else {
-        return res.status(200).json({ ...user.toObject(), accessToken });
-      }
     } catch (error) {
       next(error);
     }
@@ -143,7 +119,14 @@ router
     try {
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
-      await User.create({
+
+      let oldAccount = await User.findOne({ email: email });
+
+      if (oldAccount) {
+        return next(new Error("Account already exists"));
+      }
+
+      const user = await User.create({
         lastName,
         firstName,
         userName: (firstName + lastName).trim().replace(/ /g, "-") + Date.now(),
@@ -170,7 +153,7 @@ router
       //   return res.status(200).json({ ...user.toObject(), accessToken });
       // }
 
-      // generateValidationToken(user)
+      generateValidationToken(user);
 
       res.status(200).json({
         message:
@@ -186,7 +169,7 @@ router
       const user = await User.findOne({ email: req.params.email });
       if (!user) throw new Error("User does not exist");
 
-      // let returnStatus = generateValidationToken(user);
+      let returnStatus = generateValidationToken(user);
 
       returnStatus?.then((status) => {
         if (!status) {
@@ -217,7 +200,7 @@ router
         emailVerified: true,
       });
 
-      await token.deleteOne();
+      // await token.deleteOne();
 
       if (!user) return next(new Error("User does not exist"));
 
@@ -365,7 +348,7 @@ router
               .replace(/ /g, "-") + Date.now(),
           email: req.body?.email,
           avatar: req.body?.picture?.data?.url,
-          role: req.body?.role,
+          role: req.body.role || "buyer",
           emailVerified: true,
           provider: "facebook",
           facebookId: req.body.id,
