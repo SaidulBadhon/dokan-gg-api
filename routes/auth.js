@@ -137,22 +137,6 @@ router
         emailVerified: false,
       });
 
-      // const user = await saveAccessToken(newUser);
-      // generateValidationToken(user);
-
-      // if (user?.role === "buyer") {
-      //   let customer = await Customer.findOne({ user: user._id });
-      //   if (!customer) customer = await Customer.create({ user: user._id });
-
-      //   return res.status(200).json({
-      //     ...user.toObject(),
-      //     accessToken,
-      //     customer,
-      //   });
-      // } else {
-      //   return res.status(200).json({ ...user.toObject(), accessToken });
-      // }
-
       generateValidationToken(user);
 
       res.status(200).json({
@@ -215,6 +199,41 @@ router
         });
     } catch (err) {
       console.log(JSON.stringify(err));
+      next(err);
+    }
+  })
+  .post("/forgotPassword/request", async (req, res, next) => {
+    const user = await User.findOne({ req.body.email });
+
+    if (!user) throw new Error("User does not exist");
+    let token = await Token.findOne({ userId: user._id });
+    if (token) await token.deleteOne();
+    let resetToken = crypto.randomBytes(32).toString("hex");
+
+    await new Token({
+      userId: user._id,
+      token: resetToken,
+      createdAt: Date.now(),
+    }).save();
+
+    const link = `${process.env.APP_BASE_URL}/passwordReset/${user._id}/${resetToken}`;
+    console.log(link);
+    res.send(link);
+  })
+  .post("/forgotPassword/:token", async (req, res, next) => {
+    try {
+      const { password } = req.body;
+      const hashedPassword = await hashPassword(password);
+
+      console.log(hashedPassword);
+
+      const user = await User.findByIdAndUpdate(req.params.id, {
+        password: hashedPassword,
+      });
+
+      res.status(200).json(user);
+    } catch (err) {
+      console.log(err);
       next(err);
     }
   })
@@ -366,40 +385,5 @@ router
       }
     } catch (err) {}
   });
-// .post("/:id/resetPassword/request", async (req, res, next) => {
-//   const user = await User.findOne({ email });
-
-//   if (!user) throw new Error("User does not exist");
-//   let token = await Token.findOne({ userId: user._id });
-//   if (token) await token.deleteOne();
-//   let resetToken = crypto.randomBytes(32).toString("hex");
-
-//   await new Token({
-//     userId: user._id,
-//     token: resetToken,
-//     createdAt: Date.now(),
-//   }).save();
-
-//   const link = `${process.env.APP_BASE_URL}/passwordReset/${user._id}/${resetToken}`;
-//   console.log(link);
-//   res.send(link);
-// })
-// .post("/:id/resetPassword/:token", async (req, res, next) => {
-//   try {
-//     const { password } = req.body;
-//     const hashedPassword = await hashPassword(password);
-
-//     console.log(hashedPassword);
-
-//     const user = await User.findByIdAndUpdate(req.params.id, {
-//       password: hashedPassword,
-//     });
-
-//     res.status(200).json(user);
-//   } catch (err) {
-//     console.log(err);
-//     next(err);
-//   }
-// });
 
 module.exports = router;
