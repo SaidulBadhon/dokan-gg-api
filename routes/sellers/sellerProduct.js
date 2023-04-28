@@ -4,6 +4,7 @@ const route = express.Router();
 const Store = require("../../models/store");
 const Product = require("../../models/product");
 const slugify = require("../../utils/slugify");
+const generateRandomString = require("../../utils/generateRandomString");
 
 route
   .get("/", async (req, res) => {
@@ -41,16 +42,6 @@ route
       res.status(500).send({ error: "Product profile does not exist." });
     }
   })
-  .get("/count", async (req, res) => {
-    try {
-      const count = await Product.countDocuments();
-
-      return res.status(200).json(count);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-  })
   .get("/:id", async (req, res) => {
     try {
       const product = await Product.findByIdAndUpdate(req.params.id, {
@@ -67,8 +58,8 @@ route
     try {
       const product = await Product.create({
         ...req.body,
-        slug: slugify(req.body.name),
-        owner: req?.user?._id,
+        slug: slugify(req.body.name) + "_" + generateRandomString(4),
+        createdBy: req?.user?._id,
       });
 
       return res.status(200).json(product);

@@ -20,17 +20,6 @@ route
       return res.status(500).send(err);
     }
   })
-  .get("/count", async (req, res) => {
-    try {
-      // const count = await AddressBook.estimatedDocumentCount({ user: req.user._id });
-      const count = await AddressBook.countDocuments({ user: req.user._id });
-
-      return res.status(200).json(count);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-  })
   .get("/:id", async (req, res) => {
     try {
       const addressBook = await AddressBook.findByIdAndUpdate(req.params.id, {

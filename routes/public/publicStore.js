@@ -124,12 +124,12 @@ route
       let store;
 
       if (objectIdRegex.test(req.params.id)) {
-        store = await Store.findById(req.params.id).select({ _id: 1 });
+        store = { _id: req.params.id };
       } else {
-        store = await Store.findOne(req.params.id).select({ _id: 1 });
+        store = await Store.findOne({ slug: req.params.id }).select({ _id: 1 });
       }
 
-      const addressBook = await AddressBook.find({ store });
+      const addressBook = await AddressBook.find({ store: store._id });
 
       return res.status(200).json(addressBook);
     } catch (err) {

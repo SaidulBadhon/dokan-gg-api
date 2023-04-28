@@ -2,6 +2,9 @@ const express = require("express");
 const route = express.Router();
 
 const Store = require("../../models/store");
+const generateRandomString = require("../../utils/generateRandomString");
+const slugify = require("../../utils/slugify");
+const { AddressBook } = require("../../models/addressBook");
 
 route
   .get("/", async (req, res) => {
@@ -46,17 +49,7 @@ route
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
-    }
-  })
-  .get("/count", async (req, res) => {
-    try {
-      const count = await Store.countDocuments();
-
-      return res.status(200).json(count);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send(err);
+      res.status(500).send({ error: "Faild to load stores." });
     }
   })
   .get("/:id", async (req, res) => {
@@ -68,6 +61,16 @@ route
       return res.status(200).json(store);
     } catch (err) {
       console.log(err);
+      res.status(500).send({ message: "Store does not exist." });
+    }
+  })
+  .get("/:id/addressBook", async (req, res) => {
+    try {
+      const addressBook = await AddressBook.find({ store: req.params.id });
+
+      return res.status(200).json(addressBook);
+    } catch (err) {
+      console.log(err);
       res.status(500).send({ error: "Store profile does not exist." });
     }
   })
@@ -75,13 +78,14 @@ route
     try {
       const store = await Store.create({
         ...req.body,
+        slug: slugify(req.body.name) + generateRandomString(4),
         owner: req?.user?._id,
       });
 
       return res.status(200).json(store);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Fail to create a store" });
+      res.status(500).send({ message: "Fail to create a store" });
     }
   })
   .put("/", async (req, res) => {
@@ -102,7 +106,9 @@ route
     ) {
       const store = await Store.findByIdAndUpdate(req.params.id, req.body, {
         $upsert: true,
+        new: true,
       });
+      console.log(store);
       res.status(200).json(store);
     } else {
       res.status(401).send({

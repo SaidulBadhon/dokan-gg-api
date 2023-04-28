@@ -3,6 +3,7 @@ const route = express.Router();
 
 const Product = require("../../models/product");
 const slugify = require("../../utils/slugify");
+const generateRandomString = require("../../utils/generateRandomString");
 
 route
   .get("/", async (req, res) => {
@@ -84,7 +85,7 @@ route
     try {
       const product = await Product.create({
         ...req.body,
-        slug: slugify(req.body.name),
+        slug: slugify(req.body.name) + "_" + generateRandomString(4),
         owner: req?.user?._id,
       });
 
