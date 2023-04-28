@@ -19,8 +19,8 @@ const UserSchema = new Schema(
       default: "buyer",
     },
 
-    facebookId: { type: String, required: false, unique: true },
-    googleId: { type: String, required: false, unique: true },
+    facebookId: { type: String, required: false, unique: false },
+    googleId: { type: String, required: false, unique: false },
 
     provider: {
       type: String,
