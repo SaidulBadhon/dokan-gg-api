@@ -58,7 +58,15 @@ const ProductSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
+      enum: [
+        "pending",
+        "reviewing",
+        "active",
+        "onHold",
+        "inactive",
+        "archive",
+        "delete",
+      ],
       default: "pending",
     },
 
