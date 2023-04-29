@@ -10,14 +10,13 @@ route
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const { assignedTo = "", search, status, sort = "" } = JSON.parse(filter);
+    const { search, status, sort = "" } = JSON.parse(filter);
 
     let statusFilterQuery = status ? { status } : {};
 
     const filterExp =
       {
         $and: [
-          { ...(assignedTo && { assignedTo }) },
           statusFilterQuery,
           {
             $or: [

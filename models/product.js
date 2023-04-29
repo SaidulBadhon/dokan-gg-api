@@ -69,6 +69,7 @@ const ProductSchema = new Schema(
       ],
       default: "pending",
     },
+    archived: Boolean,
 
     views: viewSchema,
     rating: ratingSchema,
