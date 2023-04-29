@@ -29,17 +29,17 @@ async function generateValidationToken(user) {
     userId: user?._id,
     token: resetToken,
     otp,
+    type: "validateEmail",
   }).save();
 
-  // TODO: will add Email send feature here when we have email support api
   const responce = await sendEmail({
+    templateId: "d-357612253fd940f184d76884907dbc8f",
     to: user?.email,
+    subject: `Here is your OTP for Dokan.gg: ${otp}`,
     username: `${user?.firstName} ${user?.lastName}`,
     otp: otp,
     link: `${process.env.APP_BASE_URL}/login/token?token=${resetToken}`,
   });
-
-  console.log("EMAIL RESPONCE : ", responce);
 
   return responce;
 }
@@ -184,7 +184,7 @@ router
         emailVerified: true,
       });
 
-      // await token.deleteOne();
+      await token.deleteOne(token);
 
       if (!user) return next(new Error("User does not exist"));
 
@@ -203,33 +203,71 @@ router
     }
   })
   .post("/forgotPassword/request", async (req, res, next) => {
-    const user = await User.findOne({ req.body.email });
+    try {
+      console.log(req.body.email);
+      const user = await User.findOne({ email: req.body.email });
 
-    if (!user) throw new Error("User does not exist");
-    let token = await Token.findOne({ userId: user._id });
-    if (token) await token.deleteOne();
-    let resetToken = crypto.randomBytes(32).toString("hex");
+      if (!user) throw new Error("User does not exist");
 
-    await new Token({
-      userId: user._id,
-      token: resetToken,
-      createdAt: Date.now(),
-    }).save();
+      let token = await Token.findOne({ userId: user._id });
+      if (token) await token.deleteOne();
+      let resetToken = crypto.randomBytes(32).toString("hex");
 
-    const link = `${process.env.APP_BASE_URL}/passwordReset/${user._id}/${resetToken}`;
-    console.log(link);
-    res.send(link);
+      const otp = generateOTP();
+
+      await new Token({
+        userId: user._id,
+        token: resetToken,
+        otp,
+        type: "forgotPassword",
+      }).save();
+
+      const deliverEmail = await sendEmail({
+        templateId: "d-2acb2a43c5344a5a811d4c97b178ccca",
+        to: user?.email,
+        subject: `Reset password - Dokan.gg`,
+        username: `${user?.firstName} ${user?.lastName}`,
+        otp: otp,
+        link: `${process.env.APP_BASE_URL}/forgot-password/new?token=${resetToken}`,
+      });
+
+      if (deliverEmail) {
+        return res.status(200).json({ status: "success" });
+      } else {
+        return res.status(400).send({ message: "Faild to deliver email." });
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   })
   .post("/forgotPassword/:token", async (req, res, next) => {
     try {
+      const { token: tokenString } = req.params;
+      console.log(tokenString);
+
+      let token;
+      if (tokenString.length <= 6) {
+        token = await Token.findOne({ otp: tokenString });
+      } else {
+        token = await Token.findOne({ token: tokenString });
+      }
+
+      if (!token) return next(new Error("Token does not exist"));
+
       const { password } = req.body;
       const hashedPassword = await hashPassword(password);
 
       console.log(hashedPassword);
 
-      const user = await User.findByIdAndUpdate(req.params.id, {
-        password: hashedPassword,
-      });
+      const user = await User.findByIdAndUpdate(
+        token.userId,
+        {
+          password: hashedPassword,
+        },
+        { new: true }
+      );
+      await token.deleteOne(token);
 
       res.status(200).json(user);
     } catch (err) {

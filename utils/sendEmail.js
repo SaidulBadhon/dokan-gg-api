@@ -3,21 +3,24 @@ const sgMail = require("@sendgrid/mail");
 // Replace with your SendGrid API key
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+// templateId: "d-357612253fd940f184d76884907dbc8f", // generateOTP
+// templateId: 'd-2acb2a43c5344a5a811d4c97b178ccca', // forgotPasswordOTP
+
 // Function to send an email
 const sendEmail = async (emailConfig) => {
-  const { to, username, otp, link } = emailConfig;
+  const { to, subject, username, otp, link, templateId } = emailConfig;
 
   const msg = {
     to: to,
     from: process.env.FROM_EMAIL,
-    templateId: "d-357612253fd940f184d76884907dbc8f",
+    templateId,
     dynamic_template_data: {
-      subject: `Here is your OTP for Dokan.gg: ${otp}`,
+      subject,
       username,
       otp,
       link,
     },
-    subject: `Here is your OTP for Dokan.gg: ${otp}`,
+    subject,
     // text: body,
     // html: body,
   };

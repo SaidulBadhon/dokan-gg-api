@@ -7,6 +7,11 @@ const TokenSchema = new Schema(
     token: { type: String, required: true },
     otp: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
+    type: {
+      type: String,
+      enum: ["validateEmail", "forgotPassword"],
+      default: "validateEmail",
+    },
   },
   { timestamps: true }
 );
