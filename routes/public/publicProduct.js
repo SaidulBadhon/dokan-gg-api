@@ -68,7 +68,7 @@ route
     try {
       let products = await Product.aggregate([
         { $match: { status: "active" } },
-        { $sample: { size: req.query?.limit || 10 } },
+        { $sample: { size: parseInt(req.query?.limit) || 10 } },
       ]);
       return res.status(200).json(products);
     } catch (err) {

@@ -25,7 +25,26 @@ route
       });
 
       const products = await Product.find({
-        $and: [statusFilterQuery, { store: { $in: stores } }],
+        $and: [
+          statusFilterQuery,
+          {
+            $or: [
+              {
+                title: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                slug: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+            ],
+            store: { $in: stores },
+          },
+        ],
       })
         .populate({
           path: "store",
@@ -82,35 +101,57 @@ route
     ).select();
     res.status(200).json(product);
   })
-  .put("/:id", async (req, res) => {
+  .put("/:id", async (req, res, next) => {
     try {
-      const product = await Product.findById(req.params.id);
+      // const product = await Product.findById(req.params.id);
+      let product;
 
-      const store = await Store.findById(product.store);
-
-      if (
-        req.user.role === "admin" ||
-        [...store.managers.toString(), store.owner.toString()].includes(
-          req.user._id.toString()
-        )
-      ) {
-        const product = await Product.findByIdAndUpdate(
-          req.params.id,
-          req.body,
-          {
-            $upsert: true,
-          }
-        );
-        res.status(200).json(product);
-      } else {
-        res.status(401).send({
-          message:
-            "You are not an authorized owner or manager of this product.",
+      if (req.user.role === "admin") {
+        product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+          $upsert: true,
         });
+      } else {
+        // Start of unsupported actions
+        if (!["pending", "delete", "archive"].includes(req.body.status))
+          return next(new Error("Authorized status: " + req.body.status));
+
+        // End of unsupported actions
+
+        product = await Product.findById(req.params.id);
+
+        if (!product) return next(new Error("Product not found"));
+
+        const store = await Store.findById(product.store);
+        if (!store) return next(new Error("Product's sotre not found"));
+
+        if (
+          [...store.managers.toString(), store.owner.toString()].includes(
+            req.user._id.toString()
+          )
+        ) {
+          product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+            $upsert: true,
+          });
+        } else {
+          return next(
+            new Error(
+              "You are not an authorized owner or manager of this product."
+            )
+          );
+        }
+
+        res.status(200).json(product);
+
+        // } else {
+        //   res.status(401).send({
+        //     message:
+        //       "You are not an authorized owner or manager of this product.",
+        //   });
+        // }
       }
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Product profile does not exist." });
+      res.status(500).send({ message: "Product does not exist." });
     }
   })
   .delete("/:id", async (req, res) => {
