@@ -1,11 +1,15 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
+const AddressBookSchema = require("./_components/addressBook");
+const ratingSchema = require("./_components/rating");
+const viewSchema = require("./_components/view");
+const paymentOption = require("./_components/paymentOption");
 
-const addressSchema = new Schema({
-  label: String,
-  isPrimary: Boolean,
-  addressBook: { type: ObjectId, ref: "AddressBook", required: true },
-});
+// const addressSchema = new Schema({
+//   label: String,
+//   isPrimary: Boolean,
+//   addressBook: AddressBookSchema,
+// });
 
 const socialLinkSchema = new Schema({
   facebook: { type: String, required: false },
@@ -14,6 +18,7 @@ const socialLinkSchema = new Schema({
   twitter: { type: String, required: false },
   tiktok: { type: String, required: false },
   linkedin: { type: String, required: false },
+  website: { type: String, required: false },
 });
 
 const StoreSchema = new Schema(
@@ -24,39 +29,63 @@ const StoreSchema = new Schema(
     logo: String,
     coverArt: String,
 
-    website: String,
     description: String,
 
     number: String,
     email: String,
 
-    // Address fields
-    address: [addressSchema],
-    // End of address
+    // Address - Start
+    address: AddressBookSchema,
+    delivery: {
+      deliveryProvider: {
+        type: String,
+        enum: ["personal", "redx", "pathao", "dokan.gg"],
+        default: "personal",
+      },
+      isOutsideCityDeliveryEnabled: { type: Boolean, default: true },
+      insideCityDeliveryFee: { type: Number, default: 75 },
+      outsideCityDeliveryFee: { type: Number, default: 150 },
+    },
+    // Address - End
 
-    // Management
+    // Management - Start
     owner: { type: ObjectId, ref: "User", required: true },
     managers: [{ type: ObjectId, ref: "User" }],
     employees: [{ type: ObjectId, ref: "User" }],
-    // End of management
+    // Management - End
 
     type: {
       type: String,
-      enum: ["physical", "facebook", "website", "tiktok", "others"],
+      enum: [
+        "physical",
+        "facebook",
+        "instagram",
+        "whatsApp",
+        "twitter",
+        "tiktok",
+        "website",
+        "others",
+      ],
       default: "facebook",
     },
     socialLinks: socialLinkSchema,
 
+    // Status - Start
     status: {
       type: String,
-      enum: ["pending", "reviewing", "active", "onHold", "inactive", "delete"],
+      enum: ["active", "pending", "reviewing", "onHold", "disabled"],
       default: "pending",
     },
+    isArchived: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    // Status - End
 
-    // rating: {
-    //  count: 500,
-    //  rate: 4.7
-    // }
+    // Payment - Start
+    paymentOptions: paymentOption,
+    // Payment - End
+
+    views: viewSchema,
+    rating: ratingSchema,
   },
   { timestamps: true }
 );

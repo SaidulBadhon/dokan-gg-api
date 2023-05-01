@@ -4,7 +4,7 @@ const Customer = require("../models/customer");
 const Store = require("../models/store");
 
 const User = require("../models/user");
-const { AddressBook } = require("../models/addressBook");
+// const { AddressBook } = require("../models/addressBook");
 const getAccessToken = require("../utils/getAccessToken");
 const hashPassword = require("../utils/hashPassword");
 const validatePassword = require("../utils/validatePassword");
@@ -58,26 +58,28 @@ route
       res.status(500).send({ message: "User does not exist." });
     }
   })
-  .get("/:id/addressBook", async (req, res) => {
-    try {
-      const addressBook = await AddressBook.find({ user: req.params.id });
+  // .get("/:id/addressBook", async (req, res) => {
+  //   try {
+  //     // const addressBook = await AddressBook.find({ user: req.params.id });
 
-      return res.status(200).json(addressBook);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ message: "Address book does not exist." });
-    }
-  })
-  .delete("/:id/addressBook/:addressBookId", async (req, res) => {
-    try {
-      const addressBook = await AddressBook.findById(addressBook);
+  //     // return res.status(200).json(addressBook);
+  //     return res.status(200);
+  //   } catch (err) {
+  //     console.log(err);
+  //     res.status(500).send({ message: "Address book does not exist." });
+  //   }
+  // })
+  // .delete("/:id/addressBook/:addressBookId", async (req, res) => {
+  //   try {
+  //     // const addressBook = await AddressBook.findById(addressBook);
 
-      return res.status(200).json(addressBook);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ message: "Address book does not exist." });
-    }
-  })
+  //     // return res.status(200).json(addressBook);
+  //     return res.status(200);
+  //   } catch (err) {
+  //     console.log(err);
+  //     res.status(500).send({ message: "Address book does not exist." });
+  //   }
+  // })
   .post("/acceptEULA", async (req, res, next) => {
     try {
       const updateUser = await User.findByIdAndUpdate(req.user._id, {

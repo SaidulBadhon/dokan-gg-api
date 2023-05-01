@@ -1,13 +1,7 @@
 const { Schema, model } = require("mongoose");
-const ratingSchema = require("./useful/rating");
-const viewSchema = require("./useful/view");
-const { ObjectId } = Schema.Types;
-
-// const imageSchema = new Schema({
-//   src: { type: String, required: true },
-//   width: { type: String, required: false },
-//   height: { type: String, required: false },
-// });
+const ratingSchema = require("./_components/rating");
+const viewSchema = require("./_components/view");
+const { ObjectId, Mixed } = Schema.Types;
 
 const colorSchema = new Schema({
   imageIndex: { type: Number, required: true },
@@ -23,19 +17,24 @@ const ProductSchema = new Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
+    searchTags: [String],
+
     store: { type: ObjectId, ref: "Store", required: true },
 
-    type: String,
-    brand: String,
+    category: {
+      primary: { type: ObjectId, ref: "Category" },
+      secondary: { type: ObjectId, ref: "Category" },
+      tertiary: { type: ObjectId, ref: "Category" },
+    },
+    brand: { type: ObjectId, ref: "Brand", required: false },
     model: String,
-
-    category: { type: ObjectId, ref: "Category" },
 
     price: { type: Number, required: true },
     previousPrices: [previousPricesSchema],
 
     shortDescription: { type: String, required: false },
     description: { type: String, required: true },
+    specifications: { type: Mixed },
 
     shippingTime: Number,
     shippingCost: Number,
@@ -45,31 +44,25 @@ const ProductSchema = new Schema(
     warranty: Number,
     maxReturnTime: Number,
 
-    // images: [imageSchema],
     images: [String],
     colors: [colorSchema],
 
-    inventory: { type: Number, required: true },
+    stock: { type: Number, required: true, default: 10 },
     condition: {
       type: String,
       enum: ["new", "likeNew", "used", "refurbished"],
       default: "new",
     },
 
+    // Status - Start
     status: {
       type: String,
-      enum: [
-        "pending",
-        "reviewing",
-        "active",
-        "onHold",
-        "inactive",
-        "archive",
-        "delete",
-      ],
+      enum: ["pending", "reviewing", "active", "onHold", "inactive"],
       default: "pending",
     },
-    archived: Boolean,
+    isArchived: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    // Status - End
 
     views: viewSchema,
     rating: ratingSchema,

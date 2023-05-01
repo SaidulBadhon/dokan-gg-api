@@ -2,7 +2,7 @@ const express = require("express");
 const route = express.Router();
 
 const Store = require("../../models/store");
-const { AddressBook } = require("../../models/addressBook");
+// const { AddressBook } = require("../../models/addressBook");
 const Product = require("../../models/product");
 
 route
@@ -116,36 +116,36 @@ route
       console.log(err);
       res.status(500).send({ error: "Faild to get featured products." });
     }
-  })
-  .get("/:id/addressBook", async (req, res) => {
-    try {
-      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-
-      let store;
-
-      if (objectIdRegex.test(req.params.id)) {
-        store = { _id: req.params.id };
-      } else {
-        store = await Store.findOne({ slug: req.params.id }).select({ _id: 1 });
-      }
-
-      const addressBook = await AddressBook.find({ store: store._id });
-
-      return res.status(200).json(addressBook);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
-    }
-  })
-  .delete("/:id/addressBook/:addressBookId", async (req, res) => {
-    try {
-      const addressBook = await AddressBook.findById(addressBook);
-
-      return res.status(200).json(addressBook);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
-    }
   });
+// .get("/:id/addressBook", async (req, res) => {
+//   try {
+//     const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+
+//     let store;
+
+//     if (objectIdRegex.test(req.params.id)) {
+//       store = { _id: req.params.id };
+//     } else {
+//       store = await Store.findOne({ slug: req.params.id }).select({ _id: 1 });
+//     }
+
+//     const addressBook = await AddressBook.find({ store: store._id });
+
+//     return res.status(200).json(addressBook);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).send({ error: "Store profile does not exist." });
+//   }
+// })
+// .delete("/:id/addressBook/:addressBookId", async (req, res) => {
+//   try {
+//     const addressBook = await AddressBook.findById(addressBook);
+
+//     return res.status(200).json(addressBook);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).send({ error: "Store profile does not exist." });
+//   }
+// });
 
 module.exports = route;

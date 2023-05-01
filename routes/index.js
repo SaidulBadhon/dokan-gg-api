@@ -4,12 +4,11 @@ const allowIfLogin = require("../middlewares/allowIfLogin");
 
 const auth = require("./auth");
 const user = require("./user");
-// const store = require("./store");
 const notification = require("./notification");
-
-const locationTree = require("./useful/locationTree");
-const addressBook = require("./useful/addressBook");
 const order = require("./order");
+
+const locationTree = require("./_components/locationTree");
+// const addressBook = require("./__unused/addressBook");
 
 // sellers routes
 const sellerDashboard = require("./sellers/sellerDashboard");
@@ -37,7 +36,7 @@ router.use("/users", allowIfLogin, user);
 router.use("/notification", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
-router.use("/addressBook", allowIfLogin, addressBook);
+// router.use("/addressBook", allowIfLogin, addressBook);
 router.use("/orders", allowIfLogin, order);
 
 // sellers routes

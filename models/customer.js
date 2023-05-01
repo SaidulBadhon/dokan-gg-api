@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const paymentOption = require("./_components/paymentOption");
 const { ObjectId } = Schema.Types;
 
 const CustomerSchema = new Schema(
@@ -20,6 +21,8 @@ const CustomerSchema = new Schema(
     bkashNumber: String,
     rocketNumber: String,
     nogodNumber: String,
+
+    paymentOptions: paymentOption,
   },
   { timestamps: true }
 );

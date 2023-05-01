@@ -4,7 +4,7 @@ const route = express.Router();
 const Store = require("../../models/store");
 const generateRandomString = require("../../utils/generateRandomString");
 const slugify = require("../../utils/slugify");
-const { AddressBook } = require("../../models/addressBook");
+// const { AddressBook } = require("../../models/addressBook");
 
 route
   .get("/", async (req, res) => {
@@ -49,14 +49,12 @@ route
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Faild to load stores." });
+      res.status(500).send({ message: "Faild to load stores." });
     }
   })
   .get("/:id", async (req, res) => {
     try {
-      const store = await Store.findByIdAndUpdate(req.params.id, {
-        $inc: { view: 1 },
-      });
+      const store = await Store.findById(req.params.id);
 
       return res.status(200).json(store);
     } catch (err) {
@@ -64,16 +62,16 @@ route
       res.status(500).send({ message: "Store does not exist." });
     }
   })
-  .get("/:id/addressBook", async (req, res) => {
-    try {
-      const addressBook = await AddressBook.find({ store: req.params.id });
+  // .get("/:id/addressBook", async (req, res) => {
+  //   try {
+  //     const addressBook = await AddressBook.find({ store: req.params.id });
 
-      return res.status(200).json(addressBook);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ error: "Store profile does not exist." });
-    }
-  })
+  //     return res.status(200).json(addressBook);
+  //   } catch (err) {
+  //     console.log(err);
+  //     res.status(500).send({ error: "Store profile does not exist." });
+  //   }
+  // })
   .post("/", async (req, res) => {
     try {
       const store = await Store.create({
