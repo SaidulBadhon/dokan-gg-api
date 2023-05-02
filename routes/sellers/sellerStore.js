@@ -4,7 +4,6 @@ const route = express.Router();
 const Store = require("../../models/store");
 const generateRandomString = require("../../utils/generateRandomString");
 const slugify = require("../../utils/slugify");
-// const { AddressBook } = require("../../models/addressBook");
 
 route
   .get("/", async (req, res) => {
@@ -25,45 +24,31 @@ route
       let isDeletedFilterQuery = { isDeleted: isDeleted ? true : false };
 
       const filterQuery = {
-        status: {
-          $ne: "isArchived",
-          $ne: "isDeleted",
-          $exists: true,
-        },
-        $or: [
-          { search: { $regex: search, $options: "i" } },
-          { search: { $exists: false } },
+        $and: [
+          statusFilterQuery,
+          isArchivedFilterQuery,
+          isDeletedFilterQuery,
+          {
+            $or: [
+              { owner: req?.user?._id },
+              { managers: [req?.user?._id] },
+              { employees: [req?.user?._id] },
+              {
+                title: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                slug: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+            ],
+          },
         ],
-        $or: [{ isArchived: true }, { isDeleted: true }],
       };
-      // const filterQuery = {
-      //   $and: [
-      //     statusFilterQuery,
-      //     isArchivedFilterQuery,
-      //     isDeletedFilterQuery,
-      //     {
-      //       $or: [
-      //         { owner: req?.user?._id },
-      //         { managers: [req?.user?._id] },
-      //         { employees: [req?.user?._id] },
-      //         {
-      //           title: {
-      //             $regex: search,
-      //             $options: "i",
-      //           },
-      //         },
-      //         {
-      //           slug: {
-      //             $regex: search,
-      //             $options: "i",
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // };
-
-      console.log(filterQuery);
 
       const stores = await Store.find(filterQuery)
         .populate({
@@ -135,7 +120,7 @@ route
     ).select();
     res.status(200).json(store);
   })
-  .put("/:id", async (req, res) => {
+  .put("/:id", async (req, res, next) => {
     try {
       let store;
 
@@ -145,8 +130,11 @@ route
         });
       } else {
         // Start of unsupported actions
-        if (req.body.status)
-          return next(new Error("Authorized status: " + req.body.status));
+        if (req.body?.status?.length > 0)
+          return next(new Error("You are not authorized."));
+
+        if (req.body.isDeleted === false)
+          return next(new Error("You are not authorized."));
 
         // End of unsupported actions
 

@@ -57,7 +57,7 @@ const ProductSchema = new Schema(
     // Status - Start
     status: {
       type: String,
-      enum: ["pending", "reviewing", "active", "onHold", "inactive"],
+      enum: ["active", "pending", "reviewing", "onHold", "inactive"],
       default: "pending",
     },
     isArchived: { type: Boolean, default: false },
