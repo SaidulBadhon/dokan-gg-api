@@ -12,19 +12,60 @@ route
       const { range = "", filter = "{}" } = req.query;
       const rangeExp = range && JSON.parse(range);
 
-      const stores = await Store.find({
-        $and: [
-          { isArchived: false },
-          { isDelete: false },
-          {
-            $or: [
-              { owner: req?.user?._id },
-              { managers: req?.user?._id },
-              { employees: req?.user?._id },
-            ],
-          },
+      const { search, status, isArchived, isDeleted } = JSON.parse(filter);
+
+      let statusFilterQuery = status ? { status } : {};
+
+      let isArchivedFilterQuery = isDeleted
+        ? {}
+        : isArchived
+        ? { isArchived }
+        : { isArchived: false };
+
+      let isDeletedFilterQuery = { isDeleted: isDeleted ? true : false };
+
+      const filterQuery = {
+        status: {
+          $ne: "isArchived",
+          $ne: "isDeleted",
+          $exists: true,
+        },
+        $or: [
+          { search: { $regex: search, $options: "i" } },
+          { search: { $exists: false } },
         ],
-      })
+        $or: [{ isArchived: true }, { isDeleted: true }],
+      };
+      // const filterQuery = {
+      //   $and: [
+      //     statusFilterQuery,
+      //     isArchivedFilterQuery,
+      //     isDeletedFilterQuery,
+      //     {
+      //       $or: [
+      //         { owner: req?.user?._id },
+      //         { managers: [req?.user?._id] },
+      //         { employees: [req?.user?._id] },
+      //         {
+      //           title: {
+      //             $regex: search,
+      //             $options: "i",
+      //           },
+      //         },
+      //         {
+      //           slug: {
+      //             $regex: search,
+      //             $options: "i",
+      //           },
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // };
+
+      console.log(filterQuery);
+
+      const stores = await Store.find(filterQuery)
         .populate({
           path: "owner",
           select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
@@ -41,13 +82,7 @@ route
         .skip(rangeExp.length && rangeExp[0])
         .sort({ createdAt: -1 });
 
-      const countDocuments = await Store.countDocuments({
-        $or: [
-          { owner: req?.user?._id },
-          { managers: req?.user?._id },
-          { employees: req?.user?._id },
-        ],
-      });
+      const countDocuments = await Store.countDocuments(filterQuery);
 
       return res.status(200).json({
         result: stores,
