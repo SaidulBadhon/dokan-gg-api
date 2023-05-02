@@ -73,7 +73,7 @@ const StoreSchema = new Schema(
     // Status - Start
     status: {
       type: String,
-      enum: ["active", "pending", "reviewing", "onHold", "disabled"],
+      enum: ["active", "pending", "reviewing", "onHold", "deactivate"],
       default: "pending",
     },
     isArchived: { type: Boolean, default: false },

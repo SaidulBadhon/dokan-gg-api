@@ -103,7 +103,6 @@ route
   })
   .put("/:id", async (req, res, next) => {
     try {
-      // const product = await Product.findById(req.params.id);
       let product;
 
       if (req.user.role === "admin") {
@@ -139,16 +138,9 @@ route
             )
           );
         }
-
-        res.status(200).json(product);
-
-        // } else {
-        //   res.status(401).send({
-        //     message:
-        //       "You are not an authorized owner or manager of this product.",
-        //   });
-        // }
       }
+
+      res.status(200).json(product);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Product does not exist." });

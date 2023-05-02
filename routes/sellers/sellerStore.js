@@ -13,10 +13,16 @@ route
       const rangeExp = range && JSON.parse(range);
 
       const stores = await Store.find({
-        $or: [
-          { owner: req?.user?._id },
-          { managers: req?.user?._id },
-          { employees: req?.user?._id },
+        $and: [
+          { isArchived: false },
+          { isDelete: false },
+          {
+            $or: [
+              { owner: req?.user?._id },
+              { managers: req?.user?._id },
+              { employees: req?.user?._id },
+            ],
+          },
         ],
       })
         .populate({
@@ -95,23 +101,47 @@ route
     res.status(200).json(store);
   })
   .put("/:id", async (req, res) => {
-    const store = await Store.findById(req.params.id);
+    try {
+      let store;
 
-    if (
-      [...store.managers.toString(), store.owner.toString()].includes(
-        req.user._id.toString()
-      )
-    ) {
-      const store = await Store.findByIdAndUpdate(req.params.id, req.body, {
-        $upsert: true,
-        new: true,
-      });
-      console.log(store);
+      if (req.user.role === "admin") {
+        store = await Store.findByIdAndUpdate(req.params.id, req.body, {
+          $upsert: true,
+        });
+      } else {
+        // Start of unsupported actions
+        if (req.body.status)
+          return next(new Error("Authorized status: " + req.body.status));
+
+        // End of unsupported actions
+
+        store = await Store.findById(req.params.id);
+        if (!store) return next(new Error("Store not found"));
+
+        // const store = await Store.findById(store.store);
+        // if (!store) return next(new Error("Store's sotre not found"));
+
+        if (
+          [...store.managers.toString(), store.owner.toString()].includes(
+            req.user._id.toString()
+          )
+        ) {
+          store = await Store.findByIdAndUpdate(req.params.id, req.body, {
+            $upsert: true,
+          });
+        } else {
+          return next(
+            new Error(
+              "You are not an authorized owner or manager of this store."
+            )
+          );
+        }
+      }
+
       res.status(200).json(store);
-    } else {
-      res.status(401).send({
-        message: "You are not an authorized owner or manager of this store.",
-      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Store does not exist." });
     }
   })
   .delete("/:id", async (req, res) => {
