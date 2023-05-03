@@ -51,16 +51,9 @@ route
       };
 
       const stores = await Store.find(filterQuery)
+        .select({ name: 1, slug: 1, logo: 1, type: 1, owner: 1, status: 1 })
         .populate({
           path: "owner",
-          select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
-        })
-        .populate({
-          path: "managers",
-          select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
-        })
-        .populate({
-          path: "employees",
           select: { avatar: 1, firstName: 1, lastName: 1, email: 1 },
         })
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)

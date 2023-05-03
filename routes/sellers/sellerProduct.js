@@ -55,8 +55,6 @@ route
         ],
       };
 
-      console.log(JSON.stringify(filterQuery, null, 4));
-
       const products = await Product.find(filterQuery)
         .populate({
           path: "store",

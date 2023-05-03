@@ -16,6 +16,7 @@ const previousPricesSchema = new Schema({
 const ProductSchema = new Schema(
   {
     name: { type: String, required: true },
+    videoUrl: String,
     slug: { type: String, required: true, unique: true },
     searchTags: [String],
 
@@ -35,14 +36,32 @@ const ProductSchema = new Schema(
     shortDescription: { type: String, required: false },
     description: { type: String, required: true },
     specifications: { type: Mixed },
+    boxContent: { type: String },
 
-    shippingTime: Number,
-    shippingCost: Number,
+    // Delivery - Start
+    packageWeight: Number,
+    dimension: {
+      length: Number,
+      width: Number,
+      height: Number,
+    },
 
-    cashOnDelivery: Boolean,
+    delivery: {
+      deliveryProvider: {
+        type: String,
+        enum: ["personal", "redx", "pathao", "dokan.gg"],
+      },
+      isOutsideCityDeliveryEnabled: Boolean,
+      insideCityDeliveryFee: Number,
+      outsideCityDeliveryFee: Number,
+
+      deliveryTime: Number,
+    },
+
+    maxReturnTime: Number,
+    // Delivery - End
 
     warranty: Number,
-    maxReturnTime: Number,
 
     images: [String],
     colors: [colorSchema],
