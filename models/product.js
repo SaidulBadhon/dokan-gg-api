@@ -60,8 +60,8 @@ const ProductSchema = new Schema(
       enum: ["active", "pending", "reviewing", "onHold", "inactive"],
       default: "pending",
     },
-    isArchived: { type: Boolean, default: false },
-    isDeleted: { type: Boolean, default: false },
+    isArchived: { type: Boolean, default: false, required: true },
+    isDeleted: { type: Boolean, default: false, required: true },
     // Status - End
 
     views: viewSchema,

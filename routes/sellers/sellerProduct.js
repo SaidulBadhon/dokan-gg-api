@@ -12,25 +12,33 @@ route
       const { range = "", filter = "{}" } = req.query;
       const rangeExp = range && JSON.parse(range);
 
-      const { search, status, sort = "" } = JSON.parse(filter);
-
-      let statusFilterQuery = status ? { status } : {};
+      const { search, status, isArchived, isDeleted } = JSON.parse(filter);
 
       const stores = await Store.find({
         $or: [
           { owner: req?.user?._id },
-          { managers: req?.user?._id },
-          { employees: req?.user?._id },
+          { managers: [req?.user?._id] },
+          { employees: [req?.user?._id] },
         ],
-      });
+      }).select("_id");
 
-      const products = await Product.find({
+      let statusFilterQuery = status ? { status } : {};
+      let isArchivedFilterQuery = isDeleted
+        ? {}
+        : isArchived
+        ? { isArchived }
+        : { isArchived: false };
+      let isDeletedFilterQuery = { isDeleted: isDeleted ? true : false };
+
+      const filterQuery = {
         $and: [
           statusFilterQuery,
+          isArchivedFilterQuery,
+          isDeletedFilterQuery,
           {
             $or: [
               {
-                title: {
+                name: {
                   $regex: search,
                   $options: "i",
                 },
@@ -42,10 +50,14 @@ route
                 },
               },
             ],
-            store: { $in: stores },
           },
+          { store: { $in: stores?.map((s) => s?._id) } },
         ],
-      })
+      };
+
+      console.log(JSON.stringify(filterQuery, null, 4));
+
+      const products = await Product.find(filterQuery)
         .populate({
           path: "store",
           select: { logo: 1, name: 1, slug: 1 },
@@ -54,9 +66,7 @@ route
         .skip(rangeExp.length && rangeExp[0])
         .sort({ createdAt: -1 });
 
-      const countDocuments = await Product.countDocuments({
-        $and: [statusFilterQuery, { store: { $in: stores } }],
-      });
+      const countDocuments = await Product.countDocuments(filterQuery);
 
       return res.status(200).json({
         result: products,
@@ -111,9 +121,11 @@ route
         });
       } else {
         // Start of unsupported actions
-        if (!["pending", "delete", "archive"].includes(req.body.status))
-          return next(new Error("Authorized status: " + req.body.status));
+        if (req.body?.status?.length > 0)
+          return next(new Error("You are not authorized."));
 
+        if (req.body.isDeleted === false)
+          return next(new Error("You are not authorized."));
         // End of unsupported actions
 
         product = await Product.findById(req.params.id);

@@ -135,7 +135,6 @@ route
 
         if (req.body.isDeleted === false)
           return next(new Error("You are not authorized."));
-
         // End of unsupported actions
 
         store = await Store.findById(req.params.id);
