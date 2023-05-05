@@ -2920,7 +2920,7 @@ const array = [
   },
   {
     localId: "475",
-    name: "Trendy Mobile Accessories",
+    name: "Mobile Accessories",
     slug: "mobiles-tablets-accessories",
     parentId: "6",
   },

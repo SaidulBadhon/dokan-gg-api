@@ -15,6 +15,7 @@ const sellerDashboard = require("./sellers/sellerDashboard");
 const sellerStore = require("./sellers/sellerStore");
 const sellerProduct = require("./sellers/sellerProduct");
 const sellerOrders = require("./sellers/sellerOrders");
+const sellerCategory = require("./sellers/sellerCategory");
 
 // admin routes
 const adminCategory = require("./admin/adminCategory");
@@ -44,6 +45,7 @@ router.use("/sellers/dashboard", allowIfLogin, sellerDashboard);
 router.use("/sellers/stores", allowIfLogin, sellerStore);
 router.use("/sellers/products", allowIfLogin, sellerProduct);
 router.use("/sellers/orders", allowIfLogin, sellerOrders);
+router.use("/sellers/categories", allowIfLogin, sellerCategory);
 
 // admin routes
 router.use("/admin/stores", allowIfLogin, adminStore);
