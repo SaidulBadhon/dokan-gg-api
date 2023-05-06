@@ -2,6 +2,7 @@ const express = require("express");
 const route = express.Router();
 
 const Brand = require("../../models/brand");
+const slugify = require("../../utils/slugify");
 
 route
   .get("/", async (req, res) => {

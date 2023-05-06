@@ -1,8 +1,8 @@
 const { model, Schema } = require("mongoose");
+const { ObjectId } = Schema.Types;
 
 const BrandSchema = new Schema(
   {
-    id: { type: String, required: true },
     name: { type: String, required: true },
     slug: { type: String, required: false },
 
