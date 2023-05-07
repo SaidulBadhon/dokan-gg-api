@@ -30,11 +30,11 @@ const ProductSchema = new Schema(
     brand: { type: ObjectId, ref: "Brand", required: false },
     model: String,
 
-    price: { type: Number, required: true },
+    price: { type: Number, required: false }, // required: true
     previousPrices: [previousPricesSchema],
 
     shortDescription: { type: String, required: false },
-    description: { type: String, required: true },
+    description: { type: String, required: false }, // required: true
     specifications: { type: Mixed },
     boxContent: { type: String },
 
@@ -66,7 +66,7 @@ const ProductSchema = new Schema(
     images: [String],
     colors: [colorSchema],
 
-    stock: { type: Number, required: true, default: 10 },
+    stock: { type: Number, required: false, default: 10 }, // required: true
     condition: {
       type: String,
       enum: ["new", "likeNew", "used", "refurbished"],
