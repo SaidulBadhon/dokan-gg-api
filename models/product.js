@@ -35,7 +35,14 @@ const ProductSchema = new Schema(
 
     shortDescription: { type: String, required: false },
     description: { type: String, required: false }, // required: true
-    specifications: { type: Mixed },
+    // specifications: { type: Mixed },
+
+    specifications: [
+      {
+        key: String,
+        value: String,
+      },
+    ],
     boxContent: { type: String },
 
     // Delivery - Start
