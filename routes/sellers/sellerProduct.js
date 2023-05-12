@@ -116,6 +116,7 @@ route
       if (req.user.role === "admin") {
         product = await Product.findByIdAndUpdate(req.params.id, req.body, {
           $upsert: true,
+          new: true,
         });
       } else {
         // Start of unsupported actions
@@ -140,6 +141,7 @@ route
         ) {
           product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             $upsert: true,
+            new: true,
           });
         } else {
           return next(
