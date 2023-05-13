@@ -30,7 +30,15 @@ route
       })
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .select({
+          invoiceNumber: 1,
+          deliveryFee: 1,
+          total: 1,
+          createdAt: 1,
+          status: 1,
+          deliveryAddress: 1,
+        });
 
       const countDocuments = await Product.countDocuments({
         "products.product": { $in: products?.map((p) => p._id) },
@@ -47,14 +55,19 @@ route
   })
   .get("/:id", async (req, res) => {
     try {
-      const product = await Product.findByIdAndUpdate(req.params.id, {
-        $inc: { view: 1 },
+      const order = await Order.findOne({
+        invoiceNumber: req.params.id,
+      }).populate({
+        path: "products.product",
+        select: { name: 1, price: 1, images: 1 },
       });
 
-      return res.status(200).json(product);
+      console.log("Order: ", order);
+
+      return res.status(200).json(order);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Product profile does not exist." });
+      res.status(500).send({ error: "order does not exist." });
     }
   })
   .post("/", async (req, res) => {

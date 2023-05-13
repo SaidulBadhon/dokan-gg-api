@@ -46,24 +46,25 @@ const OrderSchema = new Schema(
         default: "cashOnDelivery",
       },
       txnId: String,
+
+      hasPaid: Boolean,
     },
 
     status: {
       type: String,
       enum: [
-        "pending",
-
         "pendingPayment",
+        "onHold",
         "failed",
 
+        "pending",
         "processing",
-
         "shipped",
+        "localFacility",
+        "outForDelivery",
         "delivered",
-
         "completed",
 
-        "onHold",
         "canceled",
 
         "refunded",
