@@ -93,21 +93,33 @@ route
     res.status(200).json(product);
   })
   .put("/:id", async (req, res) => {
-    const product = await Product.findById(req.params.id);
+    // $upsert: true,
+    // new: true,
+    try {
+      const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+      });
+      res.status(200).json(order);
 
-    if (
-      [...product.managers.toString(), product.owner.toString()].includes(
-        req.user._id.toString()
-      )
-    ) {
-      const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-        $upsert: true,
-      });
-      res.status(200).json(product);
-    } else {
-      res.status(401).send({
-        message: "You are not an authorized owner or manager of this product.",
-      });
+      // const product = await Product.findById(req.params.id);
+
+      // if (
+      //   [...product.managers.toString(), product.owner.toString()].includes(
+      //     req.user._id.toString()
+      //   )
+      // ) {
+      //   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      //     $upsert: true,
+      //   });
+      //   res.status(200).json(product);
+      // } else {
+      //   res.status(401).send({
+      //     message: "You are not an authorized owner or manager of this product.",
+      //   });
+      // }
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Order does not exist." });
     }
   })
   .delete("/:id", async (req, res) => {
