@@ -5,48 +5,67 @@ const Product = require("../../models/product");
 
 route
   .get("/search", async (req, res) => {
-    const { range = "", filter = "{}" } = req.query;
+    const { search = "", range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const { search } = JSON.parse(filter);
+    // const { search } = JSON.parse(filter);
+    console.log(search);
 
-    let storeFilterQuery = store ? { store } : {};
-    let statusFilterQuery = { status: "active" };
-
-    const filterExp =
-      {
-        $or: [
-          {
-            name: {
-              $regex: search,
-              $options: "i",
+    const query = {
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { slug: { $regex: search, $options: "i" } },
+        { tags: { $in: [search] } },
+        { shortDescription: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { color: { $regex: search, $options: "i" } },
+        {
+          specifications: {
+            $elemMatch: {
+              $or: [
+                { key: { $regex: search, $options: "i" } },
+                { value: { $regex: search, $options: "i" } },
+              ],
             },
           },
-          {
-            searchTags: {
-              $regex: search,
-              $options: "i",
-            },
-          },
-        ],
-      } || {};
+        },
+      ],
+    };
+
+    // const filterExp =
+    //   {
+    //     $or: [
+    //       {
+    //         name: {
+    //           $regex: search,
+    //           $options: "i",
+    //         },
+    //       },
+    //       {
+    //         searchTags: {
+    //           $regex: search,
+    //           $options: "i",
+    //         },
+    //       },
+    //     ],
+    //   } || {};
 
     try {
-      const products = await Product.find(filterExp)
-        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
-        .skip(rangeExp.length && rangeExp[0])
-        .sort(sortBy || { "views.count": -1 })
-        .populate({
-          path: "store",
-          select: { logo: 1, name: 1, slug: 1 },
-        });
+      const products = await Product.find(query);
+      // .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
+      // .skip(rangeExp.length && rangeExp[0])
+      // .sort(sortBy || { "views.count": -1 })
+      // .populate({
+      //   path: "store",
+      //   select: { logo: 1, name: 1, slug: 1 },
+      // });
       // .sort({ createdAt: -1 });
 
-      const countDocuments = await Product.countDocuments(filterExp);
+      // const countDocuments = await Product.countDocuments(query);
 
       return res.status(200).json({
         result: products,
-        count: countDocuments,
+        // count: countDocuments,
       });
     } catch (err) {
       console.log(err);
