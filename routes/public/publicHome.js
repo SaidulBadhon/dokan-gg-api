@@ -57,20 +57,15 @@ route
 
     try {
       const products = await Product.find(query)
-      .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
-      .skip(rangeExp.length && rangeExp[0])
-      .sort(sortBy || { "views.count": -1 })
-      .populate({
-        path: "store",
-        select: { logo: 1, name: 1, slug: 1 },
-      });
-      .sort({ createdAt: -1 });
+        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
+        .skip(rangeExp.length && rangeExp[0])
+        .sort({ "views.count": -1 });
 
-      // const countDocuments = await Product.countDocuments(query);
+      const countDocuments = await Product.countDocuments(query);
 
       return res.status(200).json({
         result: products,
-        // count: countDocuments,
+        count: countDocuments,
       });
     } catch (err) {
       console.log(err);
