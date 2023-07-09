@@ -58,17 +58,34 @@ route
       res.status(500).send({ message: "User does not exist." });
     }
   })
-  // .get("/:id/addressBook", async (req, res) => {
-  //   try {
-  //     // const addressBook = await AddressBook.find({ user: req.params.id });
+  .get("/:id/addressBook", async (req, res) => {
+    try {
+      // const addressBook = await AddressBook.find({ user: req.params.id });
 
-  //     // return res.status(200).json(addressBook);
-  //     return res.status(200);
-  //   } catch (err) {
-  //     console.log(err);
-  //     res.status(500).send({ message: "Address book does not exist." });
-  //   }
-  // })
+      const user = req.user.populate("addressBook").execPopulate();
+
+      const addressBook = await Customer.findOne({
+        user: req.params.id,
+      }).populate("addressBook");
+
+      return res.status(200).json(addressBook);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Address book does not exist." });
+    }
+  })
+  .put("/:id/addressBook", async (req, res) => {
+    try {
+      // const addressBook = await AddressBook.find({ user: req.params.id });
+
+      const user = req.user.populate("addressBook").execPopulate();
+
+      return res.status(200).json(user.addressBook);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Address book does not exist." });
+    }
+  })
   // .delete("/:id/addressBook/:addressBookId", async (req, res) => {
   //   try {
   //     // const addressBook = await AddressBook.findById(addressBook);

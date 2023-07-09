@@ -1,8 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 
-const AddressBookSchema = require("./_components/addressBook");
-
 // Canceled – Grey
 // Completed – Blue
 // Failed – Red
@@ -23,9 +21,9 @@ const OrderSchema = new Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true },
     customer: { type: ObjectId, ref: "User", required: false },
-    deliveryAddress: AddressBookSchema,
+    deliveryAddress: { type: ObjectId, ref: "AddressBook", required: false },
     deliveryDate: Date,
-    billingAddress: AddressBookSchema,
+    billingAddress: { type: ObjectId, ref: "AddressBook", required: false },
 
     products: [productWithPriceSchema],
     store: { type: ObjectId, ref: "Store", required: true },

@@ -18,9 +18,8 @@ const CustomerSchema = new Schema(
       enum: ["bank", "bkash", "rocket", "nogod", "other"],
       default: "other",
     },
-    bkashNumber: String,
-    rocketNumber: String,
-    nogodNumber: String,
+
+    addressBook: [{ type: ObjectId, ref: "AddressBook", required: false }],
 
     paymentOptions: paymentOption,
   },

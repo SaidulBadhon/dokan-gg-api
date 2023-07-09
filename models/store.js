@@ -1,6 +1,5 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
-const AddressBookSchema = require("./_components/addressBook");
 const ratingSchema = require("./_components/rating");
 const viewSchema = require("./_components/view");
 const paymentOption = require("./_components/paymentOption");
@@ -35,7 +34,7 @@ const StoreSchema = new Schema(
     email: String,
 
     // Address - Start
-    address: AddressBookSchema,
+    address: { type: ObjectId, ref: "AddressBook", required: false },
     delivery: {
       deliveryProvider: {
         type: String,

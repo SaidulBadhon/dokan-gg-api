@@ -1,5 +1,4 @@
 const { Schema } = require("mongoose");
-// const { ObjectId } = Schema.Types;
 
 const AddressBookSchema = new Schema(
   {
@@ -17,4 +16,4 @@ const AddressBookSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = AddressBookSchema;
+module.exports = model("AddressBook", AddressBookSchema);
