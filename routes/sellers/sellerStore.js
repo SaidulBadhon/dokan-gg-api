@@ -81,16 +81,6 @@ route
       res.status(500).send({ message: "Store does not exist." });
     }
   })
-  // .get("/:id/addressBook", async (req, res) => {
-  //   try {
-  //     const addressBook = await AddressBook.find({ store: req.params.id });
-
-  //     return res.status(200).json(addressBook);
-  //   } catch (err) {
-  //     console.log(err);
-  //     res.status(500).send({ error: "Store profile does not exist." });
-  //   }
-  // })
   .post("/", async (req, res) => {
     try {
       const store = await Store.create({

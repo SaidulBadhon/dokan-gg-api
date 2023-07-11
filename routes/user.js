@@ -2,9 +2,8 @@ const express = require("express");
 const route = express.Router();
 const Customer = require("../models/customer");
 const Store = require("../models/store");
-
 const User = require("../models/user");
-// const { AddressBook } = require("../models/addressBook");
+
 const getAccessToken = require("../utils/getAccessToken");
 const hashPassword = require("../utils/hashPassword");
 const validatePassword = require("../utils/validatePassword");
@@ -58,29 +57,75 @@ route
       res.status(500).send({ message: "User does not exist." });
     }
   })
-  .get("/:id/addressBook", async (req, res) => {
+  .put("/:id/addressBook", async (req, res) => {
     try {
       // const addressBook = await AddressBook.find({ user: req.params.id });
 
-      const user = req.user.populate("addressBook").execPopulate();
+      const customer = await Customer.findOneAndUpdate(
+        { user: req.params.id },
+        {
+          $push: {
+            addressBook: req.body,
+          },
+        },
+        { new: true, upsert: true }
+      );
 
-      const addressBook = await Customer.findOne({
-        user: req.params.id,
-      }).populate("addressBook");
+      if (!customer) {
+        throw new Error("Customer not found");
+      }
 
-      return res.status(200).json(addressBook);
+      // const user = req.user.populate("addressBook").execPopulate();
+
+      return res.status(200).json(customer.addressBook);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Address book does not exist." });
     }
   })
-  .put("/:id/addressBook", async (req, res) => {
+  .put("/:id/addressBook/:addressBookId", async (req, res) => {
     try {
       // const addressBook = await AddressBook.find({ user: req.params.id });
+      // async function updateAddressBook(customerId, addressBookId, updatedAddressBook) {
 
-      const user = req.user.populate("addressBook").execPopulate();
+      try {
+        const updatedCustomer = await Customer.findOneAndUpdate(
+          { user: req.params.id, "addressBook._id": req.params.addressBookId },
+          { $set: { "addressBook.$": updatedAddressBook } },
+          { new: true }
+        );
 
-      return res.status(200).json(user.addressBook);
+        if (!updatedCustomer) {
+          throw new Error("Customer or AddressBook not found");
+        }
+
+        const updatedAddressBook = updatedCustomer.addressBook.find(
+          (addressBook) =>
+            addressBook._id.toString() === req.params.addressBookId
+        );
+
+        if (!updatedAddressBook) {
+          throw new Error("AddressBook not found");
+        }
+
+        return res.status(200).send(updatedCustomer.addressBook);
+      } catch (error) {
+        throw new Error("Failed to update addressBook: " + error.message);
+      }
+
+      // const customer = await Customer.findOneAndUpdate(
+      //   { user: req.params.id },
+      //   {
+      //     $push: {
+      //       addressBook: req.body,
+      //     },
+      //   },
+      //   { new: true, upsert: true }
+      // );
+
+      // // const user = req.user.populate("addressBook").execPopulate();
+
+      return res.status(200).json(customer);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Address book does not exist." });

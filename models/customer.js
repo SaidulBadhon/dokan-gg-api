@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const paymentOption = require("./_components/paymentOption");
+const AddressBookSchema = require("./_components/addressBook");
 const { ObjectId } = Schema.Types;
 
 const CustomerSchema = new Schema(
@@ -19,7 +20,8 @@ const CustomerSchema = new Schema(
       default: "other",
     },
 
-    addressBook: [{ type: ObjectId, ref: "AddressBook", required: false }],
+    // addressBook: [{ type: ObjectId, ref: "AddressBook", required: false }],
+    addressBook: [AddressBookSchema],
 
     paymentOptions: paymentOption,
   },

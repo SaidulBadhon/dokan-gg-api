@@ -117,6 +117,7 @@ route
           select: {
             name: 1,
             slug: 1,
+            delivery: 1,
           },
         })
         .select({ views: 0 });

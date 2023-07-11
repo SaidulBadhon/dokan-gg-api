@@ -3,12 +3,7 @@ const { ObjectId } = Schema.Types;
 const ratingSchema = require("./_components/rating");
 const viewSchema = require("./_components/view");
 const paymentOption = require("./_components/paymentOption");
-
-// const addressSchema = new Schema({
-//   label: String,
-//   isPrimary: Boolean,
-//   addressBook: AddressBookSchema,
-// });
+const AddressBookSchema = require("./_components/addressBook");
 
 const socialLinkSchema = new Schema({
   facebook: { type: String, required: false },
@@ -34,7 +29,7 @@ const StoreSchema = new Schema(
     email: String,
 
     // Address - Start
-    address: { type: ObjectId, ref: "AddressBook", required: false },
+    address: AddressBookSchema,
     delivery: {
       deliveryProvider: {
         type: String,

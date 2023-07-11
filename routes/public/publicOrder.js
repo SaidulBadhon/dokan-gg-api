@@ -1,8 +1,11 @@
 const express = require("express");
 const route = express.Router();
 
-const Order = require("../../models/order");
 const randomNumber = require("../../utils/randomNumber");
+const sortProductsForOrder = require("../../utils/sortProductsForOrder");
+
+const Order = require("../../models/order");
+const Product = require("../../models/product");
 
 route.post("/", async (req, res) => {
   try {
@@ -10,42 +13,59 @@ route.post("/", async (req, res) => {
       _id: { $in: req.body?.products?.map((i) => i.product) },
     }).select({ price: 1 });
 
-    let products = [];
-    let subTotal = 0.0;
+    // console.log(sortProductsForOrder(products));
+    let productsRow = [];
 
     Object.entries(productsArray)?.map((item) => {
       let newObj = req.body.products?.find(
         (p) => p?.product === item[1]?._id.toString()
       );
       newObj["price"] = item[1].price;
-      subTotal += newObj.quantity * newObj.price;
-      products.push(newObj);
+      productsRow.push(newObj);
     });
 
-    const data = {
-      invoiceNumber: randomNumber(),
-      // customer:req.user._id,
+    const storeGroupedProdcuts = sortProductsForOrder(productsRow);
+    // console.log("storeGroupedProdcuts : ", storeGroupedProdcuts);
 
-      status:
-        req.body?.paymentMethod === "cashOnDelivery"
-          ? "processing"
-          : "pendingPayment",
+    await Promise.all(
+      storeGroupedProdcuts.map(async (products) => {
+        let subTotal = 0.0;
 
-      subTotal,
+        products?.map((newObj) => {
+          subTotal += newObj?.quantity * newObj?.price;
+        });
 
-      total:
-        subTotal + (req.body?.deliveryFee || 80) - (req.body?.discount || 0),
-      ...req.body,
-      products: products,
+        console.log("products : ", products);
 
-      // coupon - check validity
-      // paymentMethod
-      // if bkash trxId
-    };
-    // console.log(data);
-    const order = await Order.create(data);
+        const data = {
+          invoiceNumber: randomNumber(),
+          // customer: req.user._id,
 
-    return res.status(200).json(order);
+          status:
+            req.body?.paymentMethod === "cashOnDelivery"
+              ? "processing"
+              : "pendingPayment",
+
+          subTotal,
+
+          total:
+            subTotal +
+            (req.body?.deliveryFee || 60) -
+            (req.body?.discount || 0),
+          ...req.body,
+          products: products,
+          store: products[0].store,
+
+          // coupon - check validity
+          // paymentMethod
+          // if bkash trxId
+        };
+
+        console.log(data);
+        await Order.create(data);
+      })
+    );
+    return res.status(200).json({ status: "success" });
   } catch (err) {
     console.log(err);
     res.status(500).send({ error: "Fail to create a order" });

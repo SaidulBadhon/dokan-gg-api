@@ -8,7 +8,6 @@ const notification = require("./notification");
 const order = require("./order");
 
 const locationTree = require("./_components/locationTree");
-// const addressBook = require("./__unused/addressBook");
 
 // sellers routes
 const sellerDashboard = require("./sellers/sellerDashboard");
@@ -39,7 +38,6 @@ router.use("/users", allowIfLogin, user);
 router.use("/notification", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
-// router.use("/addressBook", allowIfLogin, addressBook);
 router.use("/orders", allowIfLogin, order);
 
 // sellers routes

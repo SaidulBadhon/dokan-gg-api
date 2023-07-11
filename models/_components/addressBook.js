@@ -15,5 +15,5 @@ const AddressBookSchema = new Schema(
   },
   { timestamps: true }
 );
-
-module.exports = model("AddressBook", AddressBookSchema);
+module.exports = AddressBookSchema;
+// module.exports = model("AddressBook", AddressBookSchema);
