@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+const { model, Schema } = require("mongoose");
+const { ObjectId } = Schema.Types;
 
-const CouponSchema = new mongoose.Schema(
+const CouponSchema = new Schema(
   {
     code: { type: String, required: true },
 
@@ -31,4 +32,4 @@ const CouponSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Coupon", CouponSchema);
+module.exports = model("Coupon", CouponSchema);

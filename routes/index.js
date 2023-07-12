@@ -19,9 +19,9 @@ const sellerBrand = require("./sellers/sellerBrand");
 
 // admin routes
 const adminCategory = require("./admin/adminCategory");
-const adminStore = require("./admin/adminStore");
-const adminProduct = require("./admin/adminProduct");
-const adminUsers = require("./admin/adminUsers");
+// const adminStore = require("./admin/adminStore");
+// const adminProduct = require("./admin/adminProduct");
+const adminUser = require("./admin/adminUser");
 
 // public routes
 const publicStore = require("./public/publicStore");
@@ -49,10 +49,10 @@ router.use("/sellers/categories", allowIfLogin, sellerCategory);
 router.use("/sellers/brands", allowIfLogin, sellerBrand);
 
 // admin routes
-router.use("/admin/stores", allowIfLogin, adminStore);
-router.use("/admin/products", allowIfLogin, adminProduct);
+// router.use("/admin/stores", allowIfLogin, adminStore);
+// router.use("/admin/products", allowIfLogin, adminProduct);
 router.use("/admin/categories", allowIfLogin, adminCategory);
-router.use("/admin/users", allowIfLogin, adminUsers);
+router.use("/admin/users", allowIfLogin, adminUser);
 
 // public routes
 router.use("/public/home", publicHome);

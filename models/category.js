@@ -1,15 +1,17 @@
-const mongoose = require("mongoose");
+const { model, Schema } = require("mongoose");
+const { ObjectId } = Schema.Types;
 
-const CategorySchema = new mongoose.Schema(
+const CategorySchema = new Schema(
   {
-    id: { type: String, required: true },
     name: { type: String, required: true },
     slug: { type: String, required: false },
 
-    parentId: { type: String, required: false },
+    parentId: { type: ObjectId, ref: "Category", required: false },
     icon: { type: String, required: false },
+
+    createdBy: { type: ObjectId, ref: "User", required: false },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Category", CategorySchema);
+module.exports = model("Category", CategorySchema);
