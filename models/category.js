@@ -6,7 +6,7 @@ const CategorySchema = new Schema(
     name: { type: String, required: true },
     slug: { type: String, required: false },
 
-    parentId: { type: ObjectId, ref: "Category", required: false },
+    parent: { type: ObjectId, ref: "Category", required: false },
     icon: { type: String, required: false },
 
     createdBy: { type: ObjectId, ref: "User", required: false },

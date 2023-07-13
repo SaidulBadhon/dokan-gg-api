@@ -30,30 +30,54 @@ route
         : { isArchived: false };
       let isDeletedFilterQuery = { isDeleted: isDeleted ? true : false };
 
-      const filterQuery = {
-        $and: [
-          statusFilterQuery,
-          isArchivedFilterQuery,
-          isDeletedFilterQuery,
-          {
-            $or: [
+      const filterQuery = ["super", "admin"].includes(req.user.role)
+        ? {
+            $and: [
+              statusFilterQuery,
+              isArchivedFilterQuery,
+              isDeletedFilterQuery,
               {
-                name: {
-                  $regex: search,
-                  $options: "i",
-                },
-              },
-              {
-                slug: {
-                  $regex: search,
-                  $options: "i",
-                },
+                $or: [
+                  {
+                    name: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    slug: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                ],
               },
             ],
-          },
-          { store: { $in: stores?.map((s) => s?._id) } },
-        ],
-      };
+          }
+        : {
+            $and: [
+              statusFilterQuery,
+              isArchivedFilterQuery,
+              isDeletedFilterQuery,
+              {
+                $or: [
+                  {
+                    name: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    slug: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                ],
+              },
+              { store: { $in: stores?.map((s) => s?._id) } },
+            ],
+          };
 
       const products = await Product.find(filterQuery)
         .populate({

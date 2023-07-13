@@ -5,7 +5,8 @@ const { ObjectId, Mixed } = Schema.Types;
 
 const colorSchema = new Schema({
   imageIndex: { type: Number, required: true },
-  colors: [String],
+  // colors: [String],
+  color: String,
 });
 
 const previousPricesSchema = new Schema({

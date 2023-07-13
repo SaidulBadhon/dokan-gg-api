@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "deploy": "serverless deploy --aws-profile components.gg"
+    "deploy": "serverless deploy --aws-profile dokan.gg"
   },
   "keywords": [
     "poket-dokan"
