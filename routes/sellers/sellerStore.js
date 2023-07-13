@@ -33,6 +33,10 @@ route
               { owner: req?.user?._id },
               { managers: [req?.user?._id] },
               { employees: [req?.user?._id] },
+            ],
+          },
+          {
+            $or: [
               {
                 title: {
                   $regex: search,
