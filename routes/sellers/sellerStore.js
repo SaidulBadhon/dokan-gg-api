@@ -23,36 +23,60 @@ route
 
       let isDeletedFilterQuery = { isDeleted: isDeleted ? true : false };
 
-      const filterQuery = {
-        $and: [
-          statusFilterQuery,
-          isArchivedFilterQuery,
-          isDeletedFilterQuery,
-          {
-            $or: [
-              { owner: req?.user?._id },
-              { managers: [req?.user?._id] },
-              { employees: [req?.user?._id] },
-            ],
-          },
-          {
-            $or: [
+      const filterQuery = ["super", "admin"].includes(req.user.role)
+        ? {
+            $and: [
+              statusFilterQuery,
+              isArchivedFilterQuery,
+              isDeletedFilterQuery,
               {
-                title: {
-                  $regex: search,
-                  $options: "i",
-                },
-              },
-              {
-                slug: {
-                  $regex: search,
-                  $options: "i",
-                },
+                $or: [
+                  {
+                    title: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    slug: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                ],
               },
             ],
-          },
-        ],
-      };
+          }
+        : {
+            $and: [
+              statusFilterQuery,
+              isArchivedFilterQuery,
+              isDeletedFilterQuery,
+              {
+                $or: [
+                  { owner: req?.user?._id },
+                  { managers: [req?.user?._id] },
+                  { employees: [req?.user?._id] },
+                ],
+              },
+              {
+                $or: [
+                  {
+                    title: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                  {
+                    slug: {
+                      $regex: search,
+                      $options: "i",
+                    },
+                  },
+                ],
+              },
+            ],
+          };
 
       const stores = await Store.find(filterQuery)
         .select({ name: 1, slug: 1, logo: 1, type: 1, owner: 1, status: 1 })
@@ -75,6 +99,15 @@ route
       res.status(500).send({ message: "Faild to load stores." });
     }
   })
+  .get("/checkSlug/:slug", async (req, res) => {
+    const store = await Store.findOne({ slug: req.params.slug }).select({
+      slug: 1,
+      _id: 1,
+    });
+
+    if (store) return res.status(200).json(store);
+    else return res.status(200).json({ message: "Store does not exist." });
+  })
   .get("/:id", async (req, res) => {
     try {
       const store = await Store.findById(req.params.id);
@@ -89,7 +122,8 @@ route
     try {
       const store = await Store.create({
         ...req.body,
-        slug: slugify(req.body.name) + generateRandomString(4),
+        slug:
+          req.body?.slug || slugify(req.body.name) + generateRandomString(4),
         owner: req?.user?._id,
       });
 

@@ -11,6 +11,7 @@ const sendEmail = require("../utils/sendEmail");
 const getAccessToken = require("../utils/getAccessToken");
 const hashPassword = require("../utils/hashPassword");
 const validatePassword = require("../utils/validatePassword");
+const generateRandomString = require("../utils/generateRandomString");
 
 const router = express.Router();
 
@@ -100,7 +101,11 @@ router
         return next(new Error("Your account has been disabled"));
       }
 
-      const validPassword = await validatePassword(password, user.password);
+      if (!user?.password) {
+        return next(new Error('Invalid password! Please use "Social Login".'));
+      }
+
+      const validPassword = await validatePassword(password, user?.password);
       if (!validPassword) return next(new Error("Password is not correct"));
       const accessToken = getAccessToken(user._id);
 
@@ -129,7 +134,9 @@ router
       const user = await User.create({
         lastName,
         firstName,
-        userName: (firstName + lastName).trim().replace(/ /g, "-") + Date.now(),
+        userName:
+          (firstName + lastName).trim().replace(/ /g, "-") +
+          generateRandomString(4),
         email,
         password: hashedPassword,
         role,
@@ -328,7 +335,7 @@ router
               userName:
                 (userInfo.data?.given_name + (userInfo.data?.family_name || ""))
                   .trim()
-                  .replace(/ /g, "-") + Date.now(),
+                  .replace(/ /g, "-") + generateRandomString(4),
               email: userInfo.data?.email,
               avatar: userInfo.data?.picture,
               role: req.body.role || "buyer",
@@ -402,7 +409,7 @@ router
           userName:
             (req.body.first_name + req.body.last_name)
               .trim()
-              .replace(/ /g, "-") + Date.now(),
+              .replace(/ /g, "-") + generateRandomString(4),
           email: req.body?.email,
           avatar: req.body?.picture?.data?.url,
           role: req.body.role || "buyer",

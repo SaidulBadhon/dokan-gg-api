@@ -59,6 +59,9 @@ route
   })
   .delete("/:id", async (req, res) => {
     await Category.deleteOne({ _id: req.params.id });
+
+    await Category.findOneAndUpdate({parent: req.params.id}, { parent: null })
+
     res.status(200).json({ id: req.params.id });
   });
 

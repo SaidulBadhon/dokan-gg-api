@@ -89,9 +89,33 @@ route
       // async function updateAddressBook(customerId, addressBookId, updatedAddressBook) {
 
       try {
+        // const updatedAddressBook = updatedCustomer.addressBook.find(
+        //   (addressBook) =>
+        //     addressBook._id.toString() === req.params.addressBookId
+        // );
+
+        // if (!updatedAddressBook) {
+        //   throw new Error("AddressBook not found");
+        // }
+
+        const { createdAt, updatedAt, ...others } = req.body;
+        console.log(others);
+
+        // { $set: { "addressBook.$": others } },
         const updatedCustomer = await Customer.findOneAndUpdate(
           { user: req.params.id, "addressBook._id": req.params.addressBookId },
-          { $set: { "addressBook.$": updatedAddressBook } },
+          {
+            $set: {
+              "addressBook.$.fullName": others?.fullName,
+              "addressBook.$.mobile": others?.mobile,
+              "addressBook.$.email": others?.email,
+              "addressBook.$.address": others?.address,
+              "addressBook.$.province": others?.province,
+              "addressBook.$.city": others?.city,
+              "addressBook.$.area": others?.area,
+              "addressBook.$.updatedAt": new Date(), // Set the updatedAt field to the current date/time
+            },
+          },
           { new: true }
         );
 
@@ -99,49 +123,35 @@ route
           throw new Error("Customer or AddressBook not found");
         }
 
-        const updatedAddressBook = updatedCustomer.addressBook.find(
-          (addressBook) =>
-            addressBook._id.toString() === req.params.addressBookId
-        );
-
-        if (!updatedAddressBook) {
-          throw new Error("AddressBook not found");
-        }
-
         return res.status(200).send(updatedCustomer.addressBook);
       } catch (error) {
         throw new Error("Failed to update addressBook: " + error.message);
       }
-
-      // const customer = await Customer.findOneAndUpdate(
-      //   { user: req.params.id },
-      //   {
-      //     $push: {
-      //       addressBook: req.body,
-      //     },
-      //   },
-      //   { new: true, upsert: true }
-      // );
-
-      // // const user = req.user.populate("addressBook").execPopulate();
-
-      return res.status(200).json(customer);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Address book does not exist." });
     }
   })
-  // .delete("/:id/addressBook/:addressBookId", async (req, res) => {
-  //   try {
-  //     // const addressBook = await AddressBook.findById(addressBook);
+  .delete("/:id/addressBook/:addressBookId", async (req, res) => {
+    try {
+      const customerId = req.params.id;
+      const addressBookItemId = req.params.addressBookId;
 
-  //     // return res.status(200).json(addressBook);
-  //     return res.status(200);
-  //   } catch (err) {
-  //     console.log(err);
-  //     res.status(500).send({ message: "Address book does not exist." });
-  //   }
-  // })
+      console.log({ customerId, addressBookItemId });
+
+      const updatedCustomer = await Customer.findOneAndUpdate(
+        { user: req.params.id },
+        { $pull: { addressBook: { _id: req.params.addressBookId } } },
+        { new: true }
+      );
+      //   console.log("customer : ", customer);
+      return res.status(200).json(updatedCustomer?.addressBook);
+    } catch (err) {
+      console.log("XD  : ", err);
+
+      res.status(500).send({ message: "Address book does not exist." });
+    }
+  })
   .post("/acceptEULA", async (req, res, next) => {
     try {
       const updateUser = await User.findByIdAndUpdate(req.user._id, {
