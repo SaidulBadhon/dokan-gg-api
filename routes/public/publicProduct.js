@@ -118,7 +118,12 @@ route
             name: 1,
             slug: 1,
             delivery: 1,
+            logo: 1,
           },
+        })
+        .populate({
+          path: "brand",
+          select: { name: 1, slug: 1 },
         })
         .select({ views: 0 });
       // // Update the rating of a product
