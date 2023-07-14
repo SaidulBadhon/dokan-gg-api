@@ -8,7 +8,7 @@ const Order = require("../../models/order");
 route.get("/", async (req, res) => {
   try {
     let totalRevenue = 0;
-    let totalCustomers = 0;
+    let totalCustomers = [];
     let totalOrders = 0;
     let totalProducts = 0;
     let totalStores = 0;
@@ -27,21 +27,32 @@ route.get("/", async (req, res) => {
 
     const orders = await Order.find({
       "products.product": { $in: products?.map((p) => p._id) },
-    }).select("total");
+    }).select({ total: 1, status: 1 });
 
-    totalRevenue = orders.reduce((total, order) => {
-      return total + (order?.total || 0);
-    }, 0);
-    totalCustomers = products.reduce((total, product) => {
-      return total + (product?.views?.count || 0);
-    }, 0);
+    totalRevenue = orders
+      .filter((order) => order.status === "completed")
+      .reduce((total, order) => {
+        return total + (order?.total || 0);
+      }, 0);
+
+    products.forEach((product) => {
+      product.views.viewers.forEach((viewer) => {
+        const ipAddress = viewer.ip;
+        if (totalCustomers[ipAddress]) {
+          totalCustomers[ipAddress] += viewer.count;
+        } else {
+          totalCustomers[ipAddress] = viewer.count;
+        }
+      });
+    });
+
     totalOrders = orders.length;
     totalProducts = products.length;
     totalStores = stores.length;
 
     return res.status(200).json({
       totalRevenue,
-      totalCustomers,
+      totalCustomers: Object.keys(totalCustomers).length,
       totalOrders,
       totalProducts,
       totalStores,
