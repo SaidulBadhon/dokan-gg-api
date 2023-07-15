@@ -103,6 +103,39 @@ route
     try {
       const product = await Product.findByIdAndUpdate(req.params.id, {
         $inc: { view: 1 },
+      }).populate({
+        path: "categories",
+
+        populate: {
+          path: "parent",
+          populate: {
+            path: "parent",
+            populate: {
+              path: "parent",
+              populate: {
+                path: "parent",
+                populate: {
+                  path: "parent",
+                  populate: {
+                    path: "parent",
+                    populate: {
+                      path: "parent",
+                      populate: {
+                        path: "parent",
+                        populate: {
+                          path: "parent",
+                          populate: {
+                            path: "parent",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
 
       return res.status(200).json(product);
@@ -141,6 +174,39 @@ route
         product = await Product.findByIdAndUpdate(req.params.id, req.body, {
           $upsert: true,
           new: true,
+        }).populate({
+          path: "categories",
+
+          populate: {
+            path: "parent",
+            populate: {
+              path: "parent",
+              populate: {
+                path: "parent",
+                populate: {
+                  path: "parent",
+                  populate: {
+                    path: "parent",
+                    populate: {
+                      path: "parent",
+                      populate: {
+                        path: "parent",
+                        populate: {
+                          path: "parent",
+                          populate: {
+                            path: "parent",
+                            populate: {
+                              path: "parent",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
       } else {
         // Start of unsupported actions
@@ -166,6 +232,39 @@ route
           product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             $upsert: true,
             new: true,
+          }).populate({
+            path: "categories",
+
+            populate: {
+              path: "parent",
+              populate: {
+                path: "parent",
+                populate: {
+                  path: "parent",
+                  populate: {
+                    path: "parent",
+                    populate: {
+                      path: "parent",
+                      populate: {
+                        path: "parent",
+                        populate: {
+                          path: "parent",
+                          populate: {
+                            path: "parent",
+                            populate: {
+                              path: "parent",
+                              populate: {
+                                path: "parent",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           });
         } else {
           return next(

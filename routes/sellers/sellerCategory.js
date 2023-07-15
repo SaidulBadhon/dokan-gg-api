@@ -9,7 +9,36 @@ route
       // const categories = await Category.find({
       //   $or: [{ parentId: { $exists: false } }, { parentId: { $eq: "" } }],
       // });
-      const categories = await Category.find();
+      const categories = await Category.find().populate({
+        path: "parent",
+        populate: {
+          path: "parent",
+          populate: {
+            path: "parent",
+            populate: {
+              path: "parent",
+              populate: {
+                path: "parent",
+                populate: {
+                  path: "parent",
+                  populate: {
+                    path: "parent",
+                    populate: {
+                      path: "parent",
+                      populate: {
+                        path: "parent",
+                        populate: {
+                          path: "parent",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
 
       return res.status(200).json(categories);
     } catch (err) {

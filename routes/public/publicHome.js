@@ -2,14 +2,14 @@ const express = require("express");
 const route = express.Router();
 
 const Product = require("../../models/product");
+const Store = require("../../models/store");
 
 route
-  .get("/search", async (req, res) => {
+  .get("/search/products", async (req, res) => {
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
     const { search } = JSON.parse(filter);
-    console.log(search);
 
     const query = {
       $and: [
@@ -37,26 +37,9 @@ route
       ],
     };
 
-    // const filterExp =
-    //   {
-    //     $or: [
-    //       {
-    //         name: {
-    //           $regex: search,
-    //           $options: "i",
-    //         },
-    //       },
-    //       {
-    //         searchTags: {
-    //           $regex: search,
-    //           $options: "i",
-    //         },
-    //       },
-    //     ],
-    //   } || {};
-
     try {
       const products = await Product.find(query)
+        .select({ name: 1, slug: 1, images: 1, price: 1 })
         .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
         .skip(rangeExp.length && rangeExp[0])
         .sort({ "views.count": -1 });
@@ -70,6 +53,43 @@ route
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Products does not exist." });
+    }
+  })
+  .get("/search/stores", async (req, res) => {
+    const { range = "", filter = "{}" } = req.query;
+    const rangeExp = range && JSON.parse(range);
+
+    const { search } = JSON.parse(filter);
+
+    const query = {
+      $and: [
+        { status: "active" },
+        {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { slug: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+          ],
+        },
+      ],
+    };
+
+    try {
+      const stores = await Store.find(query)
+        .select({ name: 1, slug: 1, logo: 1 })
+        .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
+        .skip(rangeExp.length && rangeExp[0])
+        .sort({ "views.count": -1 });
+
+      const countDocuments = await Store.countDocuments(query);
+
+      return res.status(200).json({
+        result: stores,
+        count: countDocuments,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Stores does not exist." });
     }
   })
   .get("/feature", async (req, res) => {

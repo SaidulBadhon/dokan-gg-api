@@ -6,7 +6,8 @@ const Category = require("../../models/category");
 route
   .get("/", async (req, res) => {
     try {
-      const categories = await Category.find().populate("parentId");
+      const categories = await Category.find().populate("parent");
+      // const categories = await Category.find()
 
       return res.status(200).json(categories);
     } catch (err) {
@@ -60,7 +61,10 @@ route
   .delete("/:id", async (req, res) => {
     await Category.deleteOne({ _id: req.params.id });
 
-    await Category.findOneAndUpdate({parent: req.params.id}, { parent: null })
+    await Category.findOneAndUpdate(
+      { parent: req.params.id },
+      { parent: null }
+    );
 
     res.status(200).json({ id: req.params.id });
   });
