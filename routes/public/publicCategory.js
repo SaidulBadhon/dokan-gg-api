@@ -7,8 +7,8 @@ route
   .get("/", async (req, res) => {
     try {
       const categories = await Category.find({
-        $or: [{ parentId: { $exists: false } }, { parentId: { $eq: "" } }],
-      });
+        parent: { $exists: false },
+      }).exec();
 
       return res.status(200).json(categories);
     } catch (err) {
@@ -18,7 +18,7 @@ route
   })
   .get("/:parentId", async (req, res) => {
     try {
-      const categories = await Category.find({ parentId: req.params.parentId });
+      const categories = await Category.find({ parent: req.params.parentId });
 
       return res.status(200).json(categories);
     } catch (err) {

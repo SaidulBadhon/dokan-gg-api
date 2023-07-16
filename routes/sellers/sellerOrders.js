@@ -13,13 +13,19 @@ route
       const { range = "", filter = "{}" } = req.query;
       const rangeExp = range && JSON.parse(range);
 
-      const stores = await Store.find({
-        $or: [
-          { owner: req?.user?._id },
-          { managers: req?.user?._id },
-          { employees: req?.user?._id },
-        ],
-      }).select({ _id: 1 });
+      let stores = [];
+
+      if (["admin", "super"].includes(req?.user?.role)) {
+        stores = await Store.find().select({ _id: 1 });
+      } else {
+        stores = await Store.find({
+          $or: [
+            { owner: req?.user?._id },
+            { managers: req?.user?._id },
+            { employees: req?.user?._id },
+          ],
+        }).select({ _id: 1 });
+      }
 
       const products = await Product.find({
         store: { $in: stores },
@@ -96,6 +102,33 @@ route
     // $upsert: true,
     // new: true,
     try {
+      console.log("XXXXXXXXXXXXXX XXXXXXXXXXXXXXXX");
+
+      if (req.body.status === "canceled") {
+        if ((req.body.addToStock = true)) {
+          const order = await Order.findById(req.params.id);
+          const products = order.products;
+          for (let i = 0; i < products.length; i++) {
+            const product = products[i];
+            const productInDb = await Product.findById(product.product);
+            productInDb.stock += product.quantity;
+            await productInDb.save();
+          }
+        }
+      }
+
+      if (req.body.status === "processing") {
+        console.log("processing XXXXXXXXXXXXXXXX");
+        const order = await Order.findById(req.params.id);
+        const products = order.products;
+        for (let i = 0; i < products.length; i++) {
+          const product = products[i];
+          const productInDb = await Product.findById(product.product);
+          productInDb.stock -= product.quantity;
+          await productInDb.save();
+        }
+      }
+
       const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
       });

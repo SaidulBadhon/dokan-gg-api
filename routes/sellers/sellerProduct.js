@@ -5,6 +5,7 @@ const Store = require("../../models/store");
 const Product = require("../../models/product");
 const slugify = require("../../utils/slugify");
 const generateRandomString = require("../../utils/generateRandomString");
+const updateObjectWithReplacement = require("../../utils/updateObjectWithReplacement");
 
 route
   .get("/", async (req, res) => {
@@ -168,15 +169,10 @@ route
   })
   .put("/:id", async (req, res, next) => {
     try {
-      let product;
-
-      if (req.user.role === "admin") {
-        product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-          $upsert: true,
-          new: true,
-        }).populate({
-          path: "categories",
-
+      let product = await Product.findById(req.params.id).populate({
+        path: "categories",
+        populate: {
+          path: "parent",
           populate: {
             path: "parent",
             populate: {
@@ -195,9 +191,6 @@ route
                           path: "parent",
                           populate: {
                             path: "parent",
-                            populate: {
-                              path: "parent",
-                            },
                           },
                         },
                       },
@@ -207,7 +200,12 @@ route
               },
             },
           },
-        });
+        },
+      });
+
+      if (req.user.role === "admin") {
+        updateObjectWithReplacement(product, req.body);
+        // product.save();
       } else {
         // Start of unsupported actions
         if (req.body?.status?.length > 0)
@@ -229,53 +227,28 @@ route
             req.user._id.toString()
           )
         ) {
-          product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-            $upsert: true,
-            new: true,
-          }).populate({
-            path: "categories",
-
-            populate: {
-              path: "parent",
-              populate: {
-                path: "parent",
-                populate: {
-                  path: "parent",
-                  populate: {
-                    path: "parent",
-                    populate: {
-                      path: "parent",
-                      populate: {
-                        path: "parent",
-                        populate: {
-                          path: "parent",
-                          populate: {
-                            path: "parent",
-                            populate: {
-                              path: "parent",
-                              populate: {
-                                path: "parent",
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
-        } else {
-          return next(
-            new Error(
-              "You are not an authorized owner or manager of this product."
-            )
-          );
+          updateObjectWithReplacement(product, req.body);
+          // product.save();
         }
       }
 
-      res.status(200).json(product);
+      if (product.price && req.body.price) {
+        product["previousPrices"] = [
+          ...product.previousPrices,
+          { price: product.price, expiryDate: new Date() },
+        ];
+        product.price = req.body.price;
+      }
+
+      const updatedProduct = await Product.findByIdAndUpdate(
+        product._id,
+        product,
+        { new: true }
+      );
+
+      console.log(product);
+
+      return res.status(200).json(updatedProduct);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Product does not exist." });

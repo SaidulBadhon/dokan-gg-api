@@ -74,9 +74,10 @@ route
             invoiceNumber: randomNumber(),
             customer: req.user._id,
 
+            // ? "processing"
             status:
               req.body?.paymentMethod === "cashOnDelivery"
-                ? "processing"
+                ? "pending"
                 : "pendingPayment",
 
             subTotal,
