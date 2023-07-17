@@ -145,7 +145,7 @@ route
     try {
       let store;
 
-      if (req.user.role === "admin") {
+      if (["super", "admin"].includes(req.user.role)) {
         store = await Store.findByIdAndUpdate(req.params.id, req.body, {
           $upsert: true,
         });
@@ -188,8 +188,12 @@ route
     }
   })
   .delete("/:id", async (req, res) => {
-    await Store.deleteOne({ _id: req.params.id });
-    res.status(200).json({ id: req.params.id });
+    if (["super", "admin"].includes(req.user.role)) {
+      await Store.deleteOne({ _id: req.params.id });
+      res.status(200).json({ id: req.params.id });
+    } else {
+      res.status(500).send({ message: "You are not authorized." });
+    }
   });
 
 module.exports = route;

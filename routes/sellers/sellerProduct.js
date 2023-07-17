@@ -205,7 +205,7 @@ route
         },
       });
 
-      if (req.user.role === "admin") {
+      if (["super", "admin"].includes(req.user.role)) {
         console.log("DX", req.body);
         // console.log(updateObjectWithReplacement(product, req.body));
         // newProduct = Object.assign({}, product, req.body);
