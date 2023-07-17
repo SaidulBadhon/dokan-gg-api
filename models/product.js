@@ -91,6 +91,7 @@ const ProductSchema = new Schema(
     },
     isArchived: { type: Boolean, default: false, required: true },
     isDeleted: { type: Boolean, default: false, required: true },
+    isOutOfStock: { type: Boolean, default: false, required: true },
     // Status - End
 
     views: viewSchema,

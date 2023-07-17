@@ -169,6 +169,8 @@ route
   })
   .put("/:id", async (req, res, next) => {
     try {
+      let newProduct;
+
       let product = await Product.findById(req.params.id).populate({
         path: "categories",
         populate: {
@@ -204,7 +206,12 @@ route
       });
 
       if (req.user.role === "admin") {
-        updateObjectWithReplacement(product, req.body);
+        console.log("DX", req.body);
+        // console.log(updateObjectWithReplacement(product, req.body));
+        // newProduct = Object.assign({}, product, req.body);
+
+        newProduct = { ...product.toObject(), ...req.body };
+
         // product.save();
       } else {
         // Start of unsupported actions
@@ -227,26 +234,32 @@ route
             req.user._id.toString()
           )
         ) {
-          updateObjectWithReplacement(product, req.body);
+          console.log("XD");
+          // updateObjectWithReplacement(product, req.body);
+          // newProduct = Object.assign({}, product, req.body);
+          newProduct = { ...product.toObject(), ...req.body };
+
           // product.save();
         }
       }
 
-      if (product.price && req.body.price) {
-        product["previousPrices"] = [
-          ...product.previousPrices,
-          { price: product.price, expiryDate: new Date() },
+      if (
+        newProduct.price &&
+        req.body.price &&
+        newProduct.price !== req.body.price
+      ) {
+        newProduct["previousPrices"] = [
+          ...newProduct.previousPrices,
+          { price: newProduct.price, expiryDate: new Date() },
         ];
-        product.price = req.body.price;
+        newProduct.price = req.body.price;
       }
 
       const updatedProduct = await Product.findByIdAndUpdate(
-        product._id,
-        product,
+        newProduct._id,
+        newProduct,
         { new: true }
       );
-
-      console.log(product);
 
       return res.status(200).json(updatedProduct);
     } catch (err) {

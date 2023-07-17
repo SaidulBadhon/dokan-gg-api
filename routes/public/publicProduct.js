@@ -8,21 +8,24 @@ route
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const {
-      store,
-      search,
-      // status,
-      sortBy,
-    } = JSON.parse(filter);
+    const { store, search, category, minPrice, maxPrice, sortBy } =
+      JSON.parse(filter);
 
     let storeFilterQuery = store ? { store } : {};
     let statusFilterQuery = { status: "active" };
+    let categoryFilterQuery = category
+      ? { categories: { $in: [category] } }
+      : {};
+    let priceFilterQuery =
+      minPrice && maxPrice ? { price: { $gte: minPrice, $lte: maxPrice } } : {};
 
     const filterExp =
       {
         $and: [
           storeFilterQuery,
           statusFilterQuery,
+          categoryFilterQuery,
+          priceFilterQuery,
           {
             $or: [
               {
@@ -33,6 +36,24 @@ route
               },
               {
                 slug: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                shortDescription: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                description: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                searchTags: {
                   $regex: search,
                   $options: "i",
                 },
