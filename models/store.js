@@ -15,6 +15,12 @@ const socialLinkSchema = new Schema({
   website: { type: String, required: false },
 });
 
+const sectionSchema = new Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  products: [{ type: ObjectId, ref: "Product", required: false }],
+});
+
 const StoreSchema = new Schema(
   {
     name: { type: String },
@@ -77,6 +83,15 @@ const StoreSchema = new Schema(
     // Payment - Start
     paymentOptions: paymentOption,
     // Payment - End
+
+    // Template - Start
+    isBestSeller: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
+    isTopRated: { type: Boolean, default: false },
+
+    sections: [sectionSchema],
+    selectedTemplate: { type: String, default: "tamplate2" },
+    // Template - End
 
     views: viewSchema,
     rating: ratingSchema,

@@ -71,6 +71,15 @@ route
         .populate({
           path: "store",
           select: { logo: 1, name: 1, slug: 1 },
+        })
+        .select({
+          name: 1,
+          slug: 1,
+          price: 1,
+          previousPrices: 1,
+          stock: 1,
+          isOutOfStock: 1,
+          images: 1,
         });
       // .sort({ createdAt: -1 });
 
@@ -88,8 +97,19 @@ route
   .get("/feature", async (req, res) => {
     try {
       let products = await Product.aggregate([
-        { $match: { status: "active" } },
+        { $match: { status: "active", isFeatured: true } },
         { $sample: { size: parseInt(req.query?.limit) || 10 } },
+        {
+          $project: {
+            name: 1,
+            slug: 1,
+            price: 1,
+            previousPrices: 1,
+            stock: 1,
+            isOutOfStock: 1,
+            images: 1,
+          },
+        },
       ]);
       return res.status(200).json(products);
     } catch (err) {
