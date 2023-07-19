@@ -26,6 +26,7 @@ const adminUser = require("./admin/adminUser");
 
 // public routes
 const publicStore = require("./public/publicStore");
+const publicBrands = require("./public/publicBrands");
 const publicProduct = require("./public/publicProduct");
 const publicOrder = require("./public/publicOrder");
 const publicCategory = require("./public/publicCategory");
@@ -61,6 +62,7 @@ router.use("/admin/users", allowIfLogin, adminUser);
 router.use("/public", public);
 router.use("/public/home", publicHome);
 router.use("/public/stores", publicStore);
+router.use("/public/brands", publicBrands);
 router.use("/public/products", publicProduct);
 router.use("/public/orders", publicOrder);
 router.use("/public/categories", publicCategory);
