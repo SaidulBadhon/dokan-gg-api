@@ -82,6 +82,7 @@ route
           stock: 1,
           isOutOfStock: 1,
           images: 1,
+          rating: 1,
         });
       // .sort({ createdAt: -1 });
 
@@ -110,6 +111,7 @@ route
             stock: 1,
             isOutOfStock: 1,
             images: 1,
+            rating: 1,
           },
         },
       ]);
