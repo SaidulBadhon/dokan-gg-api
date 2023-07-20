@@ -168,7 +168,17 @@ route
           path: "brand",
           select: { name: 1, slug: 1 },
         })
+        .populate({
+          path: "rating.reviews.createdBy",
+          select: {
+            firstName: 1,
+            lastName: 1,
+            userName: 1,
+            avatar: 1,
+          },
+        })
         .select({ views: 0 });
+
       // // Update the rating of a product
       // const product = await Product.findOneAndUpdate(
       //   { _id: req.params.id }, // Replace 'product_id' with the actual ID of the product you want to update

@@ -6,6 +6,7 @@ const auth = require("./auth");
 const user = require("./user");
 const notification = require("./notification");
 const order = require("./order");
+const product = require("./product");
 
 const locationTree = require("./_components/locationTree");
 
@@ -20,8 +21,6 @@ const sellerBrand = require("./sellers/sellerBrand");
 // admin routes
 const adminCategory = require("./admin/adminCategory");
 const adminBrand = require("./admin/adminBrand");
-// const adminStore = require("./admin/adminStore");
-// const adminProduct = require("./admin/adminProduct");
 const adminUser = require("./admin/adminUser");
 
 // public routes
@@ -42,6 +41,7 @@ router.use("/notification", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
 router.use("/orders", allowIfLogin, order);
+router.use("/products", allowIfLogin, product);
 
 // sellers routes
 router.use("/sellers/dashboard", allowIfLogin, sellerDashboard);
