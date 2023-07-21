@@ -4,11 +4,11 @@ const { ObjectId } = Schema.Types;
 const NotificationSchema = new Schema(
   {
     sender: { type: ObjectId, ref: "User", required: false },
-    receiver: { type: ObjectId, ref: "User", required: true },
+    receiver: { type: ObjectId, ref: "User", required: false },
     type: {
       type: String,
-      enum: ["System", "Order", "JobStatus"],
-      default: "System",
+      enum: ["system", "order", "product", "store", "user"],
+      default: "system",
     },
     content: { type: Object, required: false },
     seen: { type: Boolean, default: false },
