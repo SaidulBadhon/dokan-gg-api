@@ -14,11 +14,11 @@ provider:
     APP_BASE_URL: https://dokan.gg
     SENDGRID_API_KEY: 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
     FROM_EMAIL: "No Reply <no-reply@dokan.gg>"
-    AWS_ACCESS_KEY_ID: AKIARYRWBLEN3K5HI47G
-    AWS_SECRET_ACCESS_KEY: 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
-    AWS_BUCKET: cdn.dokan.gg
-    AWS_REGION: ap-southeast-1
-    S3_URL: https://s3.ap-southeast-1.amazonaws.com/cdn.dokan.gg/
+    TINIFY_AWS_ACCESS_KEY_ID: AKIARYRWBLEN3K5HI47G
+    TINIFY_AWS_SECRET_ACCESS_KEY: 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
+    TINIFY_AWS_BUCKET: cdn.dokan.gg
+    TINIFY_AWS_REGION: ap-southeast-1
+    TINIFY_S3_URL: https://s3.ap-southeast-1.amazonaws.com/cdn.dokan.gg/
     TINIFY_KEY: 4XJ9fyhM0tvwwGVDnJkCnB1rzxCqvsCW
 
 functions:
