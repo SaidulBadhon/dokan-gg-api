@@ -20,22 +20,22 @@ route
     try {
       req.body?.map(async (key) => {
         console.log(key);
-        const source = await tinify.fromUrl(process.env.S3_URL + key);
+        const source = await tinify.fromUrl(process.env.TINIFY_S3_URL + key);
 
         await source.store({
           service: "s3",
-          aws_access_key_id: process.env.AWS_ACCESS_KEY_ID,
-          aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,
+          aws_access_key_id: process.env.TINIFY_AWS_ACCESS_KEY_ID,
+          aws_secret_access_key: process.env.TINIFY_AWS_SECRET_ACCESS_KEY,
           region: "ap-southeast-1",
           headers: {
             "Cache-Control": "public, max-age=31536000",
           },
-          path: process.env.AWS_BUCKET + "/" + key,
+          path: process.env.TINIFY_AWS_BUCKET + "/" + key,
         });
 
         await CompresImage.create({
           key: key,
-          location: process.env.S3_URL + key,
+          location: process.env.TINIFY_S3_URL + key,
         });
       });
 
