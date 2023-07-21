@@ -20,6 +20,8 @@ const CustomerSchema = new Schema(
       default: "other",
     },
 
+    wishlist: [{ type: ObjectId, ref: "Product", required: false }],
+
     // addressBook: [{ type: ObjectId, ref: "AddressBook", required: false }],
     addressBook: [AddressBookSchema],
 

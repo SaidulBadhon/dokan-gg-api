@@ -132,6 +132,23 @@ route
       res.status(500).send({ message: "Address book does not exist." });
     }
   })
+  .put("/:id/wishlist", async (req, res) => {
+    try {
+      const customer = await Customer.findOneAndUpdate(
+        { user: req.params.id },
+        {
+          $push: {
+            wishlist: req.body,
+          },
+        },
+        { new: true, upsert: true }
+      );
+      res.status(200).json(customer.wishlist);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Wishlist does not exist." });
+    }
+  })
   .delete("/:id/addressBook/:addressBookId", async (req, res) => {
     try {
       const customerId = req.params.id;

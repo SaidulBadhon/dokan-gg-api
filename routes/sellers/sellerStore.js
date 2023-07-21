@@ -2,6 +2,8 @@ const express = require("express");
 const route = express.Router();
 
 const Store = require("../../models/store");
+const Product = require("../../models/product");
+
 const generateRandomString = require("../../utils/generateRandomString");
 const slugify = require("../../utils/slugify");
 
@@ -118,6 +120,28 @@ route
       res.status(500).send({ message: "Store does not exist." });
     }
   })
+  .get("/:id/products/names", async (req, res) => {
+    try {
+      const products = await Product.find({
+        $and: [
+          { status: "active" },
+          { isArchived: false },
+          { isDeleted: false },
+          { store: req.params.id },
+        ],
+      }).select({
+        name: 1,
+        slug: 1,
+        _id: 1,
+        images: 1,
+      });
+
+      return res.status(200).json(products);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Product profile does not exist." });
+    }
+  })
   .post("/", async (req, res) => {
     try {
       const store = await Store.create({
@@ -180,6 +204,66 @@ route
           );
         }
       }
+
+      res.status(200).json(store);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Store does not exist." });
+    }
+  })
+  .put(`/:id/sections`, async (req, res) => {
+    try {
+      console.log(req.body);
+
+      const store = await Store.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: {
+            sections: req.body,
+          },
+        },
+        { new: true }
+      );
+
+      res.status(200).json(store);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Store does not exist." });
+    }
+  })
+  .put(`/:id/sections/:sectionId`, async (req, res) => {
+    try {
+      const store = await Store.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            "sections.$[section]": req.body,
+          },
+        },
+        {
+          arrayFilters: [{ "section._id": req.params.sectionId }],
+          new: true,
+        }
+      );
+
+      res.status(200).json(store);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ message: "Store does not exist." });
+    }
+  })
+  .put(`/:id/sections/:sectionId/move`, async (req, res) => {
+    try {
+      const { fromIndex, toIndex } = req.body;
+
+      const store = await Store.findByIdAndUpdate(
+        req.params.id,
+        {
+          $splice: { sections: [{ $size: fromIndex }, 1] },
+          $splice: { sections: [{ $size: toIndex }, 0, sectionToMove] },
+        },
+        { new: true }
+      );
 
       res.status(200).json(store);
     } catch (err) {

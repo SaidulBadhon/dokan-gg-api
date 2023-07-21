@@ -33,7 +33,29 @@ route.post(`/:productId/comment`, async (req, res) => {
         },
       },
       { new: true }
-    );
+    )
+      .populate({
+        path: "store",
+        select: {
+          name: 1,
+          slug: 1,
+          delivery: 1,
+          logo: 1,
+        },
+      })
+      .populate({
+        path: "brand",
+        select: { name: 1, slug: 1 },
+      })
+      .populate({
+        path: "rating.reviews.createdBy",
+        select: {
+          firstName: 1,
+          lastName: 1,
+          userName: 1,
+          avatar: 1,
+        },
+      });
 
     // console.log(JSON.stringify(products));
 
