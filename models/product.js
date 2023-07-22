@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const ratingSchema = require("./_components/rating");
 const viewSchema = require("./_components/view");
-const { ObjectId, Mixed } = Schema.Types;
+const { ObjectId } = Schema.Types;
 
 const colorSchema = new Schema({
   imageIndex: { type: Number, required: true },
@@ -12,6 +12,10 @@ const colorSchema = new Schema({
 const previousPricesSchema = new Schema({
   price: { type: Number, required: true },
   expiryDate: { type: Date, required: true },
+});
+const imageSchema = new Schema({
+  large: { type: String, required: false },
+  thumb: { type: String, required: false },
 });
 
 const ProductSchema = new Schema(
@@ -73,7 +77,7 @@ const ProductSchema = new Schema(
 
     warranty: Number,
 
-    images: [String],
+    images: [imageSchema],
     colors: [colorSchema],
 
     stock: { type: Number, required: false, default: 10 }, // required: true
