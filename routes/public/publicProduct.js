@@ -138,6 +138,14 @@ route
         { $match: { status: "active", isFeatured: true } },
         { $sample: { size: parseInt(req.query?.limit) || 10 } },
         {
+          $lookup: {
+            from: "Store", // Replace "stores" with the actual name of the Store collection
+            localField: "store", // Replace "store" with the field that links to the Store collection
+            foreignField: "_id", // Replace "_id" with the field in the Store collection that matches the "store" field in the Product collection
+            as: "store", // The field name in the output documents that will hold the populated store data
+          },
+        },
+        {
           $project: {
             name: 1,
             slug: 1,

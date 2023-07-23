@@ -113,17 +113,34 @@ route
   })
   .get("/:id/products/:productId", async (req, res) => {
     try {
+      const store = await Store.findOne({
+        slug: req.params.id,
+        status: "active",
+      }).select({ _id: 1, name: 1, slug: 1, delivery: 1, logo: 1 });
+
       const product = await Product.findOne({
-        store: req.params.id,
-        _id: req.params.productId,
+        store: store?._id,
+        slug: req.params.productId,
         status: "active",
         isDeleted: false,
         isArchived: false,
-      }).select({
-        slug: 1,
-      });
+      })
+        .populate({
+          path: "brand",
+          select: { name: 1, slug: 1 },
+        })
+        .populate({
+          path: "rating.reviews.createdBy",
+          select: {
+            firstName: 1,
+            lastName: 1,
+            userName: 1,
+            avatar: 1,
+          },
+        })
+        .select({ views: 0 });
 
-      return res.status(200).json(product);
+      return res.status(200).json({ ...product?.toObject(), store });
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Products does not exist." });
