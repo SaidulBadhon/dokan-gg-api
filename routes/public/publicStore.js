@@ -94,6 +94,41 @@ route
       res.status(500).send({ error: "Store profile does not exist." });
     }
   })
+  .get("/:id/products", async (req, res) => {
+    try {
+      const products = await Product.find({
+        store: req.params.id,
+        status: "active",
+        isDeleted: false,
+        isArchived: false,
+      }).select({
+        slug: 1,
+      });
+
+      return res.status(200).json(products);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Products does not exist." });
+    }
+  })
+  .get("/:id/products/:productId", async (req, res) => {
+    try {
+      const product = await Product.findOne({
+        store: req.params.id,
+        _id: req.params.productId,
+        status: "active",
+        isDeleted: false,
+        isArchived: false,
+      }).select({
+        slug: 1,
+      });
+
+      return res.status(200).json(product);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Products does not exist." });
+    }
+  })
   .get("/:id/feature", async (req, res) => {
     try {
       const objectIdRegex = /^[0-9a-fA-F]{24}$/;
