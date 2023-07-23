@@ -14,7 +14,7 @@ const app = express();
 // Set up a rate limit of 100 requests per minute
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 50, // limit each IP to 50 requests per windowMs
+  max: 200, // limit each IP to 200 requests per windowMs
 });
 
 app.use(morgan("dev"));

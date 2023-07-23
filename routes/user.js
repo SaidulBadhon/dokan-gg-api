@@ -31,7 +31,18 @@ route
       accessToken = getAccessToken(user._id);
 
       if (["seller", "manager", "employee"].includes(user?.role)) {
-        let stores = await Store.find({ owner: user._id }).select({
+        let stores = await Store.find({
+          $and: [
+            {
+              $or: [
+                { owner: user?._id },
+                { managers: { $in: [user?._id] } },
+                { employees: { $in: [user?._id] } },
+              ],
+            },
+            { isDeleted: false },
+          ],
+        }).select({
           owner: 0,
           managers: 0,
           employees: 0,

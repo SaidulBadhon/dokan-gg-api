@@ -172,6 +172,7 @@ route
       if (["super", "admin"].includes(req.user.role)) {
         store = await Store.findByIdAndUpdate(req.params.id, req.body, {
           $upsert: true,
+          new: true,
         });
       } else {
         // Start of unsupported actions
@@ -195,6 +196,7 @@ route
         ) {
           store = await Store.findByIdAndUpdate(req.params.id, req.body, {
             $upsert: true,
+            new: true,
           });
         } else {
           return next(

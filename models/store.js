@@ -20,18 +20,14 @@ const sectionSchema = new Schema({
   description: { type: String, required: true },
   products: [{ type: ObjectId, ref: "Product", required: false }],
 });
-const imageSchema = new Schema({
-  large: { type: String, required: false },
-  thumb: { type: String, required: false },
-});
 
 const StoreSchema = new Schema(
   {
     name: { type: String },
     slug: { type: String, unique: true },
 
-    logo: imageSchema,
-    coverArt: imageSchema,
+    logo: String,
+    coverArt: String,
 
     description: String,
 

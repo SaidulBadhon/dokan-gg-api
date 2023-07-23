@@ -91,7 +91,7 @@ route
     res.status(200).json(user);
   })
   .put("/:id", async (req, res) => {
-    if (req.user.role === "admin") {
+    if (["super", "admin"].includes(req.user.role)) {
       const user = await User.findByIdAndUpdate(req.params.id, req.body, {
         $upsert: true,
       });

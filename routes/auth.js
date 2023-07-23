@@ -52,10 +52,15 @@ const getExtraData = async (user, accessToken) => {
 
   if (["seller", "manager", "employee"].includes(user?.role)) {
     let stores = await Store.find({
-      $or: [
-        { owner: user?._id },
-        { managers: { $in: [user?._id] } },
-        { employees: { $in: [user?._id] } },
+      $and: [
+        {
+          $or: [
+            { owner: user?._id },
+            { managers: { $in: [user?._id] } },
+            { employees: { $in: [user?._id] } },
+          ],
+        },
+        { isDeleted: false },
       ],
     });
 

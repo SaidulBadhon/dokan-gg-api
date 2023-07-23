@@ -28,7 +28,6 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.22",
     "serverless-http": "^2.7.0",
-    "tinify": "^1.7.1",
     "validator": "^13.6.0"
   }
 }
