@@ -1,11 +1,23 @@
 const express = require("express");
 const route = express.Router();
+// const Facebook = require("facebook-node-sdk");
 
 const Store = require("../../models/store");
 const Product = require("../../models/product");
 const slugify = require("../../utils/slugify");
 const generateRandomString = require("../../utils/generateRandomString");
 const updateObjectWithReplacement = require("../../utils/updateObjectWithReplacement");
+
+// const appId = "1406948566360276";
+// const appSecret = "69bb6519ba2cd96dc67417d4f04010b5";
+// const accessToken =
+//   "EAATZCnL2D4NQBAPbF30sVoASreKSgdH8prnVzhNNRMrqv1rj4HnFp6jZBzfQ69hWlgtvOm7B7xXw3ICP7XbhL33LEg65yAZAfC55pcMkK36cwaw6YhBd5HjhGuDfaZAiAdbpe1m0OUCcYIRqq8P5cZBw79jp6jAZAWXIWnMGnhwTjkD9YeveveLCjnZBTJL0DMPUSbtuYdsjmZC8fUlbHBVDszVCiN2hGXsZD";
+
+// const graphAPI = new GraphAPI({
+//   appId,
+//   appSecret,
+//   accessToken,
+// });
 
 route
   .get("/", async (req, res) => {
@@ -154,6 +166,25 @@ route
       });
 
       return res.status(200).json(product);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Fail to create a product" });
+    }
+  })
+  .post("/:productId/share", async (req, res) => {
+    try {
+      const postData = {
+        message: "This is a post created with Node.js!",
+        link: "https://www.example.com",
+      };
+
+      const response = await graphAPI.post("me/feed", postData);
+
+      facebook.api("/me/feed", function (err, data) {
+        console.log(data); // => { id: ... }
+      });
+
+      res.status(200).send();
     } catch (err) {
       console.log(err);
       res.status(500).send({ error: "Fail to create a product" });

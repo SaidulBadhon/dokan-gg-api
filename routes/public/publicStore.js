@@ -56,6 +56,22 @@ route
       res.status(500).send({ error: "Store profile does not exist." });
     }
   })
+  .get("/ids", async (req, res) => {
+    try {
+      const stores = await Store.find({
+        status: "active",
+        isDeleted: false,
+        isArchived: false,
+      }).select({
+        slug: 1,
+      });
+
+      return res.status(200).json(stores);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "stores does not exist." });
+    }
+  })
   .get("/:id", async (req, res) => {
     try {
       const objectIdRegex = /^[0-9a-fA-F]{24}$/;

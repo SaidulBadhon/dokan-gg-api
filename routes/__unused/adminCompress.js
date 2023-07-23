@@ -1,7 +1,7 @@
 const express = require("express");
 const route = express.Router();
 const tinify = require("tinify");
-const CompresImage = require("../../models/_components/compresImage");
+const CompresImage = require("./compresImage");
 
 const Product = require("../../models/product");
 const Store = require("../../models/store");

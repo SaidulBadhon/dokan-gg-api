@@ -116,6 +116,22 @@ route
       }
     }
   })
+  .get("/ids", async (req, res) => {
+    try {
+      const products = await Product.find({
+        status: "active",
+        isDeleted: false,
+        isArchived: false,
+      }).select({
+        slug: 1,
+      });
+
+      return res.status(200).json(products);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Products does not exist." });
+    }
+  })
   .get("/feature", async (req, res) => {
     try {
       let products = await Product.aggregate([
@@ -172,8 +188,7 @@ route
               referer: req.headers.referer || req.headers.referrer,
             },
           },
-        },
-        { new: true }
+        }
         // { new: true, upsert: true }
       )
         .populate({
