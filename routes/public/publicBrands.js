@@ -22,7 +22,19 @@ route
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send({ error: "Brand profile does not exist." });
+      res.status(500).send({ error: "Brand does not exist." });
+    }
+  })
+  .get("/ids", async (req, res) => {
+    try {
+      const brands = await Brand.find({ status: "active" }).select({
+        slug: 1,
+      });
+
+      return res.status(200).json(brands);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Brand does not exist." });
     }
   })
   .get("/:id", async (req, res) => {
