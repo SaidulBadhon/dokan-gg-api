@@ -90,7 +90,7 @@ router
   .post("/login", async (req, res, next) => {
     try {
       const { email, password } = req.body;
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email: email?.toLowerCase() });
 
       if (!user) return next(new Error("Email does not exist"));
       if (!user.emailVerified) {
@@ -130,7 +130,7 @@ router
       const { email, password, role, firstName, lastName } = req.body;
       const hashedPassword = await hashPassword(password);
 
-      let oldAccount = await User.findOne({ email: email });
+      let oldAccount = await User.findOne({ email: email?.toLowerCase() });
 
       if (oldAccount) {
         return next(new Error("Account already exists"));
@@ -142,7 +142,7 @@ router
         userName:
           (firstName + lastName).trim().replace(/ /g, "-") +
           generateRandomString(4),
-        email,
+        email: email?.toLowerCase(),
         password: hashedPassword,
         role,
 
@@ -162,7 +162,9 @@ router
   })
   .get("/validation/request/:email/", async (req, res, next) => {
     try {
-      const user = await User.findOne({ email: req.params.email });
+      const user = await User.findOne({
+        email: req.params.email?.toLowerCase(),
+      });
       if (!user) throw new Error("User does not exist");
 
       let returnStatus = generateValidationToken(user);
@@ -216,8 +218,7 @@ router
   })
   .post("/forgotPassword/request", async (req, res, next) => {
     try {
-      console.log(req.body.email);
-      const user = await User.findOne({ email: req.body.email });
+      const user = await User.findOne({ email: req.body.email?.toLowerCase() });
 
       if (!user) throw new Error("User does not exist");
 
