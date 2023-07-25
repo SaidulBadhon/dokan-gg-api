@@ -299,8 +299,11 @@ route
     }
   })
   .delete("/:id", async (req, res) => {
+    if (!["super", "admin"].includes(req.user.role))
+      return res.status(401).send({ message: "You are not authorized." });
+
     await Product.deleteOne({ _id: req.params.id });
-    res.status(200).json({ id: req.params.id });
+    return res.status(200).json({ id: req.params.id });
   });
 
 module.exports = route;

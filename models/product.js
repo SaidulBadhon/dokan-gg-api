@@ -93,6 +93,8 @@ const ProductSchema = new Schema(
       enum: ["active", "pending", "reviewing", "onHold", "inactive"],
       default: "pending",
     },
+    readyForReview: { type: Boolean, default: false },
+
     isArchived: { type: Boolean, default: false, required: true },
     isDeleted: { type: Boolean, default: false, required: true },
     isOutOfStock: { type: Boolean, default: false, required: true },
@@ -100,6 +102,7 @@ const ProductSchema = new Schema(
     isBestSeller: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
     isTopRated: { type: Boolean, default: false },
+
     // Status - End
 
     views: viewSchema,
