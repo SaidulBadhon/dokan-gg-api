@@ -6,33 +6,27 @@ const Notification = require("../models/notification");
 route
   .get("/", async (req, res) => {
     try {
-      // const notifications = await Notification.find({ receiver: req.user._id })
-      let notifications = [];
+      const filter = ["super", "admin"].includes(req.user.role)
+        ? {
+            $or: [{ receiverRole: req.user.role }, { receiver: req.user._id }],
+          }
+        : {
+            receiver: req.user._id,
+          };
 
-      if (req.query?.limit) {
-        notifications = await Notification.find({ receiver: req.user._id })
-          .populate({
-            path: "sender",
-            select: {
-              firstName: 1,
-              lastName: 1,
-              avatar: 1,
-            },
-          })
-          .sort({ createdAt: -1 })
-          .limit(parseInt(req.query?.limit || 10));
-      } else {
-        notifications = await Notification.find({ receiver: req.user._id })
-          .populate({
-            path: "sender",
-            select: {
-              firstName: 1,
-              lastName: 1,
-              avatar: 1,
-            },
-          })
-          .sort({ createdAt: -1 });
-      }
+      let notifications = await Notification.find(filter)
+        .populate({
+          path: "sender",
+          select: {
+            firstName: 1,
+            lastName: 1,
+            avatar: 1,
+          },
+        })
+        .sort({ createdAt: -1 })
+        .limit(parseInt(req.query?.limit || 10));
+
+      console.log(notifications);
 
       return res.status(200).json(notifications);
     } catch (err) {

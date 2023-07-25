@@ -5,6 +5,8 @@ const NotificationSchema = new Schema(
   {
     sender: { type: ObjectId, ref: "User", required: false },
     receiver: { type: ObjectId, ref: "User", required: false },
+    receiverRole: { type: String, enum: ["super", "admin", "seller", "user"] },
+
     type: {
       type: String,
       enum: ["system", "order", "product", "store", "user"],

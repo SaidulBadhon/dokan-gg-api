@@ -4,6 +4,8 @@ const route = express.Router();
 
 const Store = require("../../models/store");
 const Product = require("../../models/product");
+const Notification = require("../../models/notification");
+
 const slugify = require("../../utils/slugify");
 const generateRandomString = require("../../utils/generateRandomString");
 const updateObjectWithReplacement = require("../../utils/updateObjectWithReplacement");
@@ -190,6 +192,45 @@ route
       res.status(500).send({ error: "Fail to create a product" });
     }
   })
+  .post("/:id/submitForReview", async (req, res) => {
+    try {
+      const product = await Product.findOneAndUpdate(
+        {
+          _id: req.params.id,
+        },
+        { $set: { readyForReview: true } },
+        { new: true }
+      );
+
+      if (!product) throw new Error("Product not found");
+
+      await Notification.insertMany([
+        {
+          sender: req.user._id,
+          receiverRole: "super",
+          type: "product",
+          content: {
+            productId: product._id,
+            message: `${product?.name} submitted for review`,
+          },
+        },
+        {
+          sender: req.user._id,
+          receiverRole: "admin",
+          type: "product",
+          content: {
+            productId: product._id,
+            message: `${product?.name} submitted for review`,
+          },
+        },
+      ]);
+
+      return res.status(200).json(product);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Product does not exist." });
+    }
+  })
   .put("/", async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       { _id: req.product._id },
@@ -265,7 +306,6 @@ route
             req.user._id.toString()
           )
         ) {
-          console.log("XD");
           // updateObjectWithReplacement(product, req.body);
           // newProduct = Object.assign({}, product, req.body);
           newProduct = { ...product.toObject(), ...req.body };
@@ -299,11 +339,10 @@ route
     }
   })
   .delete("/:id", async (req, res) => {
-    if (!["super", "admin"].includes(req.user.role))
-      return res.status(401).send({ message: "You are not authorized." });
-
-    await Product.deleteOne({ _id: req.params.id });
-    return res.status(200).json({ id: req.params.id });
+    if (["super", "admin"].includes(req.user.role)) {
+      await Product.deleteOne({ _id: req.params.id });
+      return res.status(200).json({ id: req.params.id });
+    } else return res.status(401).send({ message: "You are not authorized." });
   });
 
 module.exports = route;

@@ -6,6 +6,7 @@ const Product = require("../../models/product");
 
 const generateRandomString = require("../../utils/generateRandomString");
 const slugify = require("../../utils/slugify");
+const notification = require("../../models/notification");
 
 route
   .get("/", async (req, res) => {
@@ -157,6 +158,46 @@ route
       res.status(500).send({ message: "Fail to create a store" });
     }
   })
+  .post("/:id/submitForReview", async (req, res) => {
+    try {
+      const store = await Store.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          readyForReview: false,
+        },
+        { $set: { readyForReview: true } },
+        { new: true }
+      );
+
+      if (!store) throw new Error("Store not found");
+
+      await Notification.insertMany([
+        {
+          sender: req.user._id,
+          receiverRole: "super",
+          type: "store",
+          content: {
+            storeId: store._id,
+            message: `${store?.name} submitted for review`,
+          },
+        },
+        {
+          sender: req.user._id,
+          receiverRole: "admin",
+          type: "store",
+          content: {
+            storeId: store._id,
+            message: `${store?.name} submitted for review`,
+          },
+        },
+      ]);
+
+      return res.status(200).json(store);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send({ error: "Store does not exist." });
+    }
+  })
   .put("/", async (req, res) => {
     const store = await Store.findByIdAndUpdate(
       { _id: req.store._id },
@@ -276,10 +317,8 @@ route
   .delete("/:id", async (req, res) => {
     if (["super", "admin"].includes(req.user.role)) {
       await Store.deleteOne({ _id: req.params.id });
-      res.status(200).json({ id: req.params.id });
-    } else {
-      res.status(500).send({ message: "You are not authorized." });
-    }
+      return res.status(200).json({ id: req.params.id });
+    } else return res.status(500).send({ message: "You are not authorized." });
   });
 
 module.exports = route;

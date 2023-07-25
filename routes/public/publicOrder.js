@@ -62,7 +62,38 @@ route.post("/", async (req, res) => {
           // if bkash trxId
         };
 
-        console.log(data);
+        // console.log(data);
+
+        await Notification.insertMany([
+          {
+            sender: req.user._id,
+            receiverRole: "super",
+            type: "product",
+            content: {
+              productId: product._id,
+              message: `${product?.name} submitted for review`,
+            },
+          },
+          {
+            sender: req.user._id,
+            receiverRole: "admin",
+            type: "product",
+            content: {
+              productId: product._id,
+              message: `${product?.name} submitted for review`,
+            },
+          },
+          {
+            sender: req.user._id,
+            receiverRole: "admin",
+            type: "product",
+            content: {
+              productId: product._id,
+              message: `${product?.name} submitted for review`,
+            },
+          },
+        ]);
+
         await Order.create(data);
       })
     );

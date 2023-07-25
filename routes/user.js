@@ -175,8 +175,6 @@ route
       //   console.log("customer : ", customer);
       return res.status(200).json(updatedCustomer?.addressBook);
     } catch (err) {
-      console.log("XD  : ", err);
-
       res.status(500).send({ message: "Address book does not exist." });
     }
   })

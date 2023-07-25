@@ -103,36 +103,62 @@ route
     // new: true,
     try {
       console.log("XXXXXXXXXXXXXX XXXXXXXXXXXXXXXX");
+      const order = await Order.findById(req.params.id).select({
+        products: 1,
+        _id: 1,
+        customer: 1,
+      });
 
-      if (req.body.status === "canceled") {
-        if ((req.body.addToStock = true)) {
-          const order = await Order.findById(req.params.id);
-          const products = order.products;
-          for (let i = 0; i < products.length; i++) {
-            const product = products[i];
-            const productInDb = await Product.findById(product.product);
-            productInDb.stock += product.quantity;
-            await productInDb.save();
-          }
+      if (req.body.status === "canceled" && req.body.addToStock === true) {
+        const products = order.products;
+
+        for (let i = 0; i < products.length; i++) {
+          const product = products[i];
+          const productInDb = await Product.findById(product.product);
+          productInDb.stock += product.quantity;
+          await productInDb.save();
         }
+
+        await Notification.create({
+          receiver: order.customer,
+          type: "order",
+          content: {
+            order: order._id,
+            message:
+              "Unfortunately, your order has been canceled. We are sorry for the inconvenience.",
+          },
+        });
       }
 
+      // const order = await Order.findById(req.params.id)
       if (req.body.status === "processing") {
-        console.log("processing XXXXXXXXXXXXXXXX");
-        const order = await Order.findById(req.params.id);
         const products = order.products;
+
         for (let i = 0; i < products.length; i++) {
           const product = products[i];
           const productInDb = await Product.findById(product.product);
           productInDb.stock -= product.quantity;
           await productInDb.save();
         }
+
+        await Notification.create({
+          receiver: order.customer,
+          type: "order",
+          content: {
+            order: order._id,
+            message: "Your order is now being processed.",
+          },
+        });
       }
 
-      const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
-      res.status(200).json(order);
+      const updatedOrder = await Order.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      res.status(200).json(updatedOrder);
 
       // const product = await Product.findById(req.params.id);
 

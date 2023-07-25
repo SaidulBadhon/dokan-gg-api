@@ -38,7 +38,7 @@ const public = require("./public");
 // All Routes
 router.use("/auth", auth);
 router.use("/users", allowIfLogin, user);
-router.use("/notification", allowIfLogin, notification);
+router.use("/notifications", allowIfLogin, notification);
 
 router.use("/locationTree", locationTree);
 router.use("/orders", allowIfLogin, order);

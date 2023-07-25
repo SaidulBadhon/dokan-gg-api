@@ -76,8 +76,14 @@ const StoreSchema = new Schema(
       enum: ["active", "pending", "reviewing", "onHold", "deactivate"],
       default: "pending",
     },
+    readyForReview: { type: Boolean, default: false, required: true },
+
     isArchived: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
+    isBestSeller: { type: Boolean, default: false },
+
+    isFeatured: { type: Boolean, default: false },
+    isTopRated: { type: Boolean, default: false },
     // Status - End
 
     // Payment - Start
@@ -85,9 +91,6 @@ const StoreSchema = new Schema(
     // Payment - End
 
     // Template - Start
-    isBestSeller: { type: Boolean, default: false },
-    isFeatured: { type: Boolean, default: false },
-    isTopRated: { type: Boolean, default: false },
 
     sections: [sectionSchema],
     selectedTemplate: { type: String, default: "tamplate2" },

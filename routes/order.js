@@ -6,6 +6,7 @@ const sortProductsForOrder = require("../utils/sortProductsForOrder");
 
 const Product = require("../models/product");
 const Order = require("../models/order");
+const Notification = require("../models/notification");
 
 route
   .get("/", async (req, res) => {
@@ -95,8 +96,40 @@ route
             // if bkash trxId
           };
 
-          console.log(data);
-          await Order.create(data);
+          // console.log(data);
+
+          // notify supers, admins about the order
+          // notify customer about the order
+          // // notify store owner about the order
+          const order = await Order.create(data);
+
+          await Notification.insertMany([
+            {
+              receiverRole: "super",
+              type: "order",
+              content: {
+                orderId: order._id,
+                message: "New order placed. Please review the order!",
+              },
+            },
+            {
+              receiverRole: "admin",
+              type: "order",
+              content: {
+                orderId: order._id,
+                message: "New order placed. Please review the order!",
+              },
+            },
+            {
+              receiver: req.user._id,
+              type: "system",
+              content: {
+                message: `Order placed successfully. After processing, seller will contact you with further details.`,
+                orderId: order._id,
+                // message: `Order placed successfully. Your order will be delivered within ${data?.deliveryDate}`,
+              },
+            },
+          ]);
         })
       );
 
