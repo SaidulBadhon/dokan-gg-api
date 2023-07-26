@@ -26,8 +26,6 @@ route
         .sort({ createdAt: -1 })
         .limit(parseInt(req.query?.limit || 10));
 
-      console.log(notifications);
-
       return res.status(200).json(notifications);
     } catch (err) {
       console.log(err);
