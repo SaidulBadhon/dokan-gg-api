@@ -5,7 +5,6 @@ const { ObjectId } = Schema.Types;
 
 const colorSchema = new Schema({
   imageIndex: { type: Number, required: true },
-  // colors: [String],
   color: String,
 });
 
@@ -27,13 +26,8 @@ const ProductSchema = new Schema(
 
     store: { type: ObjectId, ref: "Store", required: true },
 
-    // category: {
-    //   primary: { type: ObjectId, ref: "Category" },
-    //   secondary: { type: ObjectId, ref: "Category" },
-    //   tertiary: { type: ObjectId, ref: "Category" },
-    // },
     categories: [{ type: ObjectId, ref: "Category" }],
-    //
+
     brand: { type: ObjectId, ref: "Brand", required: false },
     model: String,
 

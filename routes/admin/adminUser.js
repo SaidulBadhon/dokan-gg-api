@@ -8,34 +8,22 @@ route
     const { range = "", filter = "{}" } = req.query;
     const rangeExp = range && JSON.parse(range);
 
-    const { search, status, sort = "" } = JSON.parse(filter);
+    const { search } = JSON.parse(filter);
 
     const filterExp =
       {
         $or: [
           {
-            firstName: {
-              $regex: search,
-              $options: "i",
-            },
+            firstName: { $regex: search, $options: "i" },
           },
           {
-            lastName: {
-              $regex: search,
-              $options: "i",
-            },
+            lastName: { $regex: search, $options: "i" },
           },
           {
-            userName: {
-              $regex: search,
-              $options: "i",
-            },
+            userName: { $regex: search, $options: "i" },
           },
           {
-            email: {
-              $regex: search,
-              $options: "i",
-            },
+            email: { $regex: search, $options: "i" },
           },
         ],
       } || {};
