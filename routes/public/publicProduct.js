@@ -87,7 +87,7 @@ route
         const products = await Product.find(filterExp)
           .limit(rangeExp.length && rangeExp[1] - rangeExp[0] + 1)
           .skip(rangeExp.length && rangeExp[0])
-          .sort(sortBy || { "views.count": -1 })
+          .sort(sortBy || { viewCount: -1 })
           .populate({
             path: "store",
             select: { logo: 1, name: 1, slug: 1 },
@@ -186,19 +186,7 @@ route
         : { slug: req.params.id, status: "active" };
 
       // Update the view count of a product
-      const product = await Product.findOneAndUpdate(
-        productQuery, // Replace 'product_id' with the actual ID of the product you want to update
-        {
-          $inc: { "views.count": 1 },
-          $push: {
-            "views.viewers": {
-              ip: req.ip,
-              referer: req.headers.referer || req.headers.referrer,
-            },
-          },
-        }
-        // { new: true, upsert: true }
-      )
+      const product = await Product.findOne(productQuery)
         .populate({
           path: "store",
           select: {
@@ -211,33 +199,7 @@ route
         .populate({
           path: "brand",
           select: { name: 1, slug: 1 },
-        })
-        .populate({
-          path: "rating.reviews.createdBy",
-          select: {
-            firstName: 1,
-            lastName: 1,
-            userName: 1,
-            avatar: 1,
-          },
-        })
-        .select({ views: 0 });
-
-      // // Update the rating of a product
-      // const product = await Product.findOneAndUpdate(
-      //   { _id: req.params.id }, // Replace 'product_id' with the actual ID of the product you want to update
-      //   {
-      //     $inc: { "rating.totalRating": 4, "rating.totalReviews": 1 },
-      //     $push: { "rating.reviews": { rating: 4, comment: "Great product!" } },
-      //   },
-      //   { new: true }
-      // )
-      //   .then((updatedProduct) => {
-      //     console.log("Product updated:", updatedProduct);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Failed to update product:", error);
-      //   });
+        });
 
       return res.status(200).json(product);
     } catch (err) {

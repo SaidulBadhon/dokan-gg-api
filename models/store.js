@@ -1,7 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { ObjectId } = Schema.Types;
 const ratingSchema = require("./_components/rating");
-const viewSchema = require("./_components/view");
 const paymentOption = require("./_components/paymentOption");
 const AddressBookSchema = require("./_components/addressBook");
 
@@ -96,7 +95,7 @@ const StoreSchema = new Schema(
     selectedTemplate: { type: String, default: "tamplate2" },
     // Template - End
 
-    views: viewSchema,
+    viewCount: { type: Number, default: 0 },
     rating: ratingSchema,
   },
   { timestamps: true }

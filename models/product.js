@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 const ratingSchema = require("./_components/rating");
-const viewSchema = require("./_components/view");
+const viewSchema = require("./view");
 const { ObjectId } = Schema.Types;
 
 const colorSchema = new Schema({
@@ -98,7 +98,7 @@ const ProductSchema = new Schema(
     isTopRated: { type: Boolean, default: false },
     // Status - End
 
-    views: viewSchema,
+    viewCount: { type: Number, default: 0 },
     rating: ratingSchema,
 
     createdBy: { type: ObjectId, ref: "User", required: true },

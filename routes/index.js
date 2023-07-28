@@ -31,6 +31,7 @@ const publicProduct = require("./public/publicProduct");
 const publicOrder = require("./public/publicOrder");
 const publicCategory = require("./public/publicCategory");
 const publicHome = require("./public/publicHome");
+const publicView = require("./public/publicView");
 const public = require("./public");
 
 // --------------------------------------- \\
@@ -68,5 +69,6 @@ router.use("/public/brands", publicBrands);
 router.use("/public/products", publicProduct);
 router.use("/public/orders", publicOrder);
 router.use("/public/categories", publicCategory);
+router.use("/public/views", publicView);
 
 module.exports = router;

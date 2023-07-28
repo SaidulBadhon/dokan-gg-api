@@ -8,7 +8,6 @@ route.post(`/:productId/comment`, async (req, res) => {
   try {
     // const products = await Product.find({ status: "active", featured: true });
     const { rating, comment } = req.body;
-    console.log(" XXXXXXXXXXXXXXXXX +", req.body);
 
     const checkValidOrder = await Order.findOne({
       customer: req?.user?._id,
