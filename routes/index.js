@@ -22,7 +22,7 @@ const sellerBrand = require("./sellers/sellerBrand");
 const adminCategory = require("./admin/adminCategory");
 const adminBrand = require("./admin/adminBrand");
 const adminUser = require("./admin/adminUser");
-// const adminCompress = require("./admin/adminCompress");
+const adminDashboard = require("./admin/adminDashboard");
 
 // public routes
 const publicStore = require("./public/publicStore");
@@ -59,7 +59,7 @@ router.use("/sellers/brands", allowIfLogin, sellerBrand);
 router.use("/admin/categories", allowIfLogin, adminCategory);
 router.use("/admin/brands", allowIfLogin, adminBrand);
 router.use("/admin/users", allowIfLogin, adminUser);
-// router.use("/admin/compress", allowIfLogin, adminCompress);
+router.use("/admin/dashboard", allowIfLogin, adminDashboard);
 
 // public routes
 router.use("/public", public);
