@@ -8,18 +8,6 @@ const Notification = require("../../models/notification");
 
 const slugify = require("../../utils/slugify");
 const generateRandomString = require("../../utils/generateRandomString");
-const updateObjectWithReplacement = require("../../utils/updateObjectWithReplacement");
-
-// const appId = "1406948566360276";
-// const appSecret = "69bb6519ba2cd96dc67417d4f04010b5";
-// const accessToken =
-//   "EAATZCnL2D4NQBAPbF30sVoASreKSgdH8prnVzhNNRMrqv1rj4HnFp6jZBzfQ69hWlgtvOm7B7xXw3ICP7XbhL33LEg65yAZAfC55pcMkK36cwaw6YhBd5HjhGuDfaZAiAdbpe1m0OUCcYIRqq8P5cZBw79jp6jAZAWXIWnMGnhwTjkD9YeveveLCjnZBTJL0DMPUSbtuYdsjmZC8fUlbHBVDszVCiN2hGXsZD";
-
-// const graphAPI = new GraphAPI({
-//   appId,
-//   appSecret,
-//   accessToken,
-// });
 
 route
   .get("/", async (req, res) => {
@@ -241,50 +229,34 @@ route
   })
   .put("/:id", async (req, res, next) => {
     try {
-      let newProduct;
-
-      let product = await Product.findById(req.params.id).populate({
-        path: "categories",
-        populate: {
-          path: "parent",
-          populate: {
-            path: "parent",
-            populate: {
-              path: "parent",
-              populate: {
-                path: "parent",
-                populate: {
-                  path: "parent",
-                  populate: {
-                    path: "parent",
-                    populate: {
-                      path: "parent",
-                      populate: {
-                        path: "parent",
-                        populate: {
-                          path: "parent",
-                          populate: {
-                            path: "parent",
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+      const product = await Product.findById(req.params.id);
+      if (!product) return next(new Error("Product not found"));
 
       if (["super", "admin"].includes(req.user.role)) {
-        console.log("DX", req.body);
-        // console.log(updateObjectWithReplacement(product, req.body));
-        // newProduct = Object.assign({}, product, req.body);
+        // Check if price is being updated
+        if (req.body.hasOwnProperty("price")) {
+          const newPrice = req.body.price;
+          const previousPrice = product.price;
 
-        newProduct = { ...product.toObject(), ...req.body };
+          // Update the price and add previous price to previousPrices array
+          product.price = newPrice;
+          product.previousPrices.push({
+            price: previousPrice,
+            expiryDate: new Date(),
+          });
+        }
 
-        // product.save();
+        // Update other fields
+        for (const key in req.body) {
+          if (req.body.hasOwnProperty(key)) {
+            product[key] = req.body[key];
+          }
+        }
+
+        // Save the updated product
+        await product.save();
+
+        return res.status(200).json(product);
       } else {
         // Start of unsupported actions
         if (req.body?.status?.length > 0)
@@ -294,45 +266,44 @@ route
           return next(new Error("You are not authorized."));
         // End of unsupported actions
 
-        product = await Product.findById(req.params.id);
+        const store = await Store.findOne({
+          _id: product.store,
+          $or: [
+            { owner: req.user?._id },
+            { managers: req.user?._id },
+            { employees: req.user?._id },
+          ],
+        }).select("_id");
+        if (!store)
+          return next(
+            new Error("You don't have access to this product's store")
+          );
 
-        if (!product) return next(new Error("Product not found"));
+        // Check if price is being updated
+        if (req.body.hasOwnProperty("price")) {
+          const newPrice = req.body.price;
+          const previousPrice = product.price;
 
-        const store = await Store.findById(product.store);
-        if (!store) return next(new Error("Product's sotre not found"));
-
-        if (
-          [...store.managers.toString(), store.owner.toString()].includes(
-            req.user._id.toString()
-          )
-        ) {
-          // updateObjectWithReplacement(product, req.body);
-          // newProduct = Object.assign({}, product, req.body);
-          newProduct = { ...product.toObject(), ...req.body };
-
-          // product.save();
+          // Update the price and add previous price to previousPrices array
+          product.price = newPrice;
+          product.previousPrices.push({
+            price: previousPrice,
+            expiryDate: new Date(),
+          });
         }
+
+        // Update other fields
+        for (const key in req.body) {
+          if (req.body.hasOwnProperty(key)) {
+            product[key] = req.body[key];
+          }
+        }
+
+        // Save the updated product
+        await product.save();
+
+        return res.status(200).json(product);
       }
-
-      if (
-        newProduct.price &&
-        req.body.price &&
-        newProduct.price !== req.body.price
-      ) {
-        newProduct["previousPrices"] = [
-          ...newProduct.previousPrices,
-          { price: newProduct.price, expiryDate: new Date() },
-        ];
-        newProduct.price = req.body.price;
-      }
-
-      const updatedProduct = await Product.findByIdAndUpdate(
-        newProduct._id,
-        newProduct,
-        { new: true }
-      );
-
-      return res.status(200).json(updatedProduct);
     } catch (err) {
       console.log(err);
       res.status(500).send({ message: "Product does not exist." });
