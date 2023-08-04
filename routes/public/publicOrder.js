@@ -6,6 +6,7 @@ const sortProductsForOrder = require("../../utils/sortProductsForOrder");
 
 const Order = require("../../models/order");
 const Product = require("../../models/product");
+const Notification = require("../../models/notification");
 
 route.post("/", async (req, res) => {
   try {
@@ -62,39 +63,26 @@ route.post("/", async (req, res) => {
           // if bkash trxId
         };
 
-        // console.log(data);
+        const order = await Order.create(data);
 
         await Notification.insertMany([
           {
-            sender: req.user._id,
             receiverRole: "super",
-            type: "product",
+            type: "order",
             content: {
-              productId: product._id,
-              message: `${product?.name} submitted for review`,
+              orderId: order._id,
+              message: "New order placed. Please review the order!",
             },
           },
           {
-            sender: req.user._id,
             receiverRole: "admin",
-            type: "product",
+            type: "order",
             content: {
-              productId: product._id,
-              message: `${product?.name} submitted for review`,
-            },
-          },
-          {
-            sender: req.user._id,
-            receiverRole: "admin",
-            type: "product",
-            content: {
-              productId: product._id,
-              message: `${product?.name} submitted for review`,
+              orderId: order._id,
+              message: "New order placed. Please review the order!",
             },
           },
         ]);
-
-        await Order.create(data);
       })
     );
     return res.status(200).json({ status: "success" });

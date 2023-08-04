@@ -229,6 +229,7 @@ route
   })
   .put("/:id", async (req, res, next) => {
     try {
+      console.log(req.body);
       const product = await Product.findById(req.params.id);
       if (!product) return next(new Error("Product not found"));
 
@@ -240,10 +241,16 @@ route
 
           // Update the price and add previous price to previousPrices array
           product.price = newPrice;
-          product.previousPrices.push({
-            price: previousPrice,
-            expiryDate: new Date(),
-          });
+          if (previousPrice && previousPrice !== newPrice) {
+            if (!product.previousPrices) {
+              product.previousPrices = [];
+            }
+
+            product.previousPrices.push({
+              price: previousPrice,
+              expiryDate: new Date(),
+            });
+          }
         }
 
         // Update other fields
@@ -284,12 +291,22 @@ route
           const newPrice = req.body.price;
           const previousPrice = product.price;
 
+          if (!product.previousPrices) {
+            product.previousPrices = [];
+          }
+
           // Update the price and add previous price to previousPrices array
           product.price = newPrice;
-          product.previousPrices.push({
-            price: previousPrice,
-            expiryDate: new Date(),
-          });
+          if (previousPrice && previousPrice !== newPrice) {
+            if (!product.previousPrices) {
+              product.previousPrices = [];
+            }
+
+            product.previousPrices.push({
+              price: previousPrice,
+              expiryDate: new Date(),
+            });
+          }
         }
 
         // Update other fields

@@ -124,7 +124,7 @@ route
               receiver: req.user._id,
               type: "system",
               content: {
-                message: `Order placed successfully. After processing, seller will contact you with further details.`,
+                message: `Order placed successfully. Your order will be delivered soon.`,
                 orderId: order._id,
                 // message: `Order placed successfully. Your order will be delivered within ${data?.deliveryDate}`,
               },

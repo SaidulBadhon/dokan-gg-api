@@ -6,6 +6,7 @@ const Product = require("../../models/product");
 const Store = require("../../models/store");
 const slugify = require("../../utils/slugify");
 const generateRandomString = require("../../utils/generateRandomString");
+const Notification = require("../../models/notification");
 
 route
   .get("/", async (req, res) => {
@@ -119,15 +120,17 @@ route
           await productInDb.save();
         }
 
-        await Notification.create({
-          receiver: order.customer,
-          type: "order",
-          content: {
-            order: order._id,
-            message:
-              "Unfortunately, your order has been canceled. We are sorry for the inconvenience.",
-          },
-        });
+        if (order?.customer) {
+          await Notification.create({
+            receiver: order.customer,
+            type: "order",
+            content: {
+              order: order._id,
+              message:
+                "Unfortunately, your order has been canceled. We are sorry for the inconvenience.",
+            },
+          });
+        }
       }
 
       // const order = await Order.findById(req.params.id)
@@ -141,14 +144,16 @@ route
           await productInDb.save();
         }
 
-        await Notification.create({
-          receiver: order.customer,
-          type: "order",
-          content: {
-            order: order._id,
-            message: "Your order is now being processed.",
-          },
-        });
+        if (order?.customer) {
+          await Notification.create({
+            receiver: order.customer,
+            type: "order",
+            content: {
+              order: order._id,
+              message: "Your order is now being processed.",
+            },
+          });
+        }
       }
 
       const updatedOrder = await Order.findByIdAndUpdate(
