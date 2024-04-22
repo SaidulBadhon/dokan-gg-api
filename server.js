@@ -1,4 +1,4 @@
-const serverless = require("serverless-http");
+// const serverless = require("serverless-http");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -58,4 +58,5 @@ if (process.env.NODE_ENV === "development") {
   app.listen(port, () => console.log("App is running on port " + port));
 }
 
-module.exports.handler = serverless(app);
+// module.exports.handler = serverless(app);
+module.exports.handler = app
